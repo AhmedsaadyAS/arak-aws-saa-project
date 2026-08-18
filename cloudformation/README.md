@@ -40,9 +40,31 @@ The final goal is to be able to delete the lab environment and recreate the comp
 - Internet Gateway attached to the VPC
 - Public route table
 - Public default route: `0.0.0.0/0` -> Internet Gateway
+  - NAT Gateway: `arak-nat-a`
+  - Type: Public NAT Gateway
+  - Subnet: `arak-public-a`
+  - Elastic IP: allocated
+  - Purpose: provide outbound Internet access for private application subnets
+- Private App Route Table: `arak-private-app-rt`
+  - Associated with `arak-app-a` and `arak-app-b`
+  - Default route: `0.0.0.0/0` → `arak-nat-a`
+- Private DB Route Table: `arak-private-db-rt`
+  - Associated with `arak-db-a` and `arak-db-b`
+  - No Internet default route
+  - 
+  - 3 Security Groups created:
+  - `arak-alb-sg` — HTTP traffic from the Internet to the ALB
+  - `arak-app-sg` — application traffic from the ALB only
+  - `arak-db-sg` — SQL Server traffic from the application layer only
 
 ### CloudFormation status
 
 Templates are being created incrementally. We will not add placeholder infrastructure just for the sake of filling files; each template should correspond to an understood and validated AWS component.
 
 Next networking item: NAT Gateway and private application routing.
+- [ ] Translate NAT Gateway into CloudFormation
+- [ ] Translate private application routing into CloudFormation
+- [ ] Translate private database routing into CloudFormation
+- [ ] Validate the complete networking stack through CloudFormation
+- [ ] Translate Security Groups into CloudFormation
+- [ ] Validate Security Group rules through CloudFormation
