@@ -32,7 +32,28 @@ The final goal is to be able to delete the lab environment and recreate the comp
 - `main.yaml` — Final orchestration/entry point if the architecture benefits from nested or modular stacks.
 
 ## Current state
+## Current Architecture Progress
 
+### Networking
+- VPC and subnet architecture completed.
+- Public and private routing completed.
+- NAT Gateway configured for private application outbound access.
+- Database subnets have no Internet default route.
+- Security Groups created for ALB, Application, and Database layers.
+
+### Compute
+- Launch Template created.
+- Auto Scaling Group created.
+- Application instances are deployed in private App subnets.
+- Current desired capacity is 1 instance.
+- Scaling range is 1–2 instances.
+
+### Next
+- Prepare Arak Backend deployment/bootstrap.
+- Update Launch Template with application startup configuration.
+- Create Target Group.
+- Create Application Load Balancer.
+- Connect ALB → Target Group → ASG.
 ### Completed manually
 
 - VPC: `10.0.0.0/16`
@@ -56,6 +77,19 @@ The final goal is to be able to delete the lab environment and recreate the comp
   - `arak-alb-sg` — HTTP traffic from the Internet to the ALB
   - `arak-app-sg` — application traffic from the ALB only
   - `arak-db-sg` — SQL Server traffic from the application layer only
+ 
+  - - Compute Layer:
+  - Launch Template: `arak-app-template`
+  - AMI: Amazon Linux 2023
+  - Instance type: `t3.micro`
+  - Security Group: `arak-app-sg`
+  - Auto Scaling Group: `arak-app-asg`
+  - Desired capacity: 1
+  - Minimum capacity: 1
+  - Maximum capacity: 2
+  - App subnets: `arak-app-a`, `arak-app-b`
+  - Availability Zones: `us-east-1a`, `us-east-1b`
+  - Health check: EC2
 
 ### CloudFormation status
 
