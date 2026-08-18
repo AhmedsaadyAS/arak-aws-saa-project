@@ -2,37 +2,37 @@
 
 ## Status
 
-**Next execution step — not started yet.**
+**In progress — VPC foundation and public routing deployed.**
 
-This checklist turns the approved VPC design into AWS resources. The deployment should be completed in small validated steps, with evidence added to `EVIDENCE/screenshots/` and the documentation updated after each successful stage.
+This checklist turns the approved VPC design into AWS resources. The deployment is being completed in small validated steps, with evidence added to `EVIDENCE/screenshots/` and the documentation updated after each successful stage.
 
 ## Phase 1 — Region and Availability Zones
 
-- [ ] Confirm AWS region
-- [ ] Confirm two Availability Zones available in the selected region
-- [ ] Record the selected AZ IDs/names in deployment notes
+- [x] Confirm AWS region — `us-east-1`
+- [x] Confirm two Availability Zones available in the selected region
+- [x] Record the selected AZ IDs/names in deployment notes — `us-east-1a`, `us-east-1b`
 
 ## Phase 2 — VPC Foundation
 
-- [ ] Create VPC: `10.0.0.0/16`
-- [ ] Enable DNS resolution
-- [ ] Enable DNS hostnames
-- [ ] Create and attach Internet Gateway
-- [ ] Record VPC ID and IGW ID
+- [x] Create VPC: `10.0.0.0/16`
+- [x] Enable DNS resolution
+- [x] Enable DNS hostnames
+- [x] Create and attach Internet Gateway — `arak-igw`
+- [ ] Record VPC ID and IGW ID in deployment notes
 
 ## Phase 3 — Subnets
 
-- [ ] Public-A: `10.0.1.0/24`
-- [ ] Public-B: `10.0.2.0/24`
-- [ ] App-A: `10.0.11.0/24`
-- [ ] App-B: `10.0.12.0/24`
-- [ ] DB-A: `10.0.21.0/24`
-- [ ] DB-B: `10.0.22.0/24`
+- [x] Public-A: `10.0.1.0/24` — `arak-public-a` — `us-east-1a`
+- [x] Public-B: `10.0.2.0/24` — `arak-public-b` — `us-east-1b`
+- [x] App-A: `10.0.11.0/24` — `arak-app-a` — `us-east-1a`
+- [x] App-B: `10.0.12.0/24` — `arak-app-b` — `us-east-1b`
+- [x] DB-A: `10.0.21.0/24` — `arak-db-a` — `us-east-1a`
+- [x] DB-B: `10.0.22.0/24` — `arak-db-b` — `us-east-1b`
 
 ## Phase 4 — Routing
 
-- [ ] Public route table with `0.0.0.0/0 -> IGW`
-- [ ] Associate Public-A and Public-B
+- [x] Public route table with `0.0.0.0/0 -> IGW` — `arak-public-rt`
+- [x] Associate Public-A and Public-B
 - [ ] Create NAT Gateway(s) in public subnet(s)
 - [ ] App-A route: `0.0.0.0/0 -> NAT Gateway`
 - [ ] App-B route: `0.0.0.0/0 -> NAT Gateway`
