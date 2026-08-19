@@ -2,9 +2,9 @@
 
 ## Status
 
-**Design phase — not deployed yet.**
+**Implemented and manually validated.**
 
-This document defines the proposed network foundation for the Arak AWS Solutions Architect – Associate project. It follows the selected Manara brief: a production-grade EC2 application in a VPC with public and private subnets across two Availability Zones, with ALB, Auto Scaling, NAT Gateway, Security Groups, NACLs, and a Multi-AZ managed database.
+This document records the validated network foundation for the Arak AWS Solutions Architect – Associate project. It follows the selected Manara brief: a production-grade EC2 application in a VPC with public and private subnets across two Availability Zones, with ALB, Auto Scaling, NAT Gateway, Security Groups, NACLs, and a private managed database.
 
 ## 1. Design Goals
 
@@ -84,6 +84,14 @@ This keeps private EC2 instances private while allowing controlled outbound acce
 
 Two NAT Gateways provide better AZ independence but cost more. A single NAT Gateway is acceptable as a temporary cost-saving lab configuration, but it would introduce a cross-AZ dependency and a single point of failure for private-subnet egress. The final production-oriented design therefore uses one NAT Gateway per AZ unless the project budget requires the lab alternative.
 
+## NAT Gateway Implementation
+
+The production-oriented design prefers one NAT Gateway per Availability Zone.
+
+For the current lab implementation, a single NAT Gateway named `arak-nat-a` was deployed in Public-A. Both private application subnets currently use the private application route table that routes outbound traffic through this NAT Gateway.
+
+This is a cost-optimized lab configuration and introduces a potential cross-AZ dependency for private-subnet egress.
+
 ## 7. Database Route Tables
 
 The DB subnets will use dedicated database route tables.
@@ -152,19 +160,15 @@ Route 53, CloudFront, and WAF are part of the expected target architecture from 
 
 This keeps the implementation incremental and makes it easier to validate each layer.
 
-## 12. Implementation Order
+## 12. Implementation Record
 
-1. Select AWS region and two Availability Zones.
-2. Create VPC `10.0.0.0/16`.
-3. Create six subnets using the table above.
-4. Create and attach Internet Gateway.
-5. Create public route table and associations.
-6. Create NAT Gateway(s) and private application route tables.
-7. Create isolated database route tables.
-8. Create Security Groups.
-9. Create NACL configuration where required.
-10. Validate the network before deploying the application layer.
+1. AWS region: `us-east-1`, Availability Zones: `us-east-1a` and `us-east-1b`.
+2. VPC `10.0.0.0/16` and six subnets were created.
+3. Internet Gateway, public routing, NAT Gateway, private application routing, and private database routing were created.
+4. ALB, application, and database Security Groups were created and validated.
+5. EC2-to-RDS connectivity and the complete ALB-to-application flow were validated.
+6. The next implementation order is CloudFormation networking, security, database, compute, load balancing, and monitoring.
 
-## 13. What Is Not Done Yet
+## 13. Manual Validation Status
 
-No VPC, subnet, route table, NAT Gateway, Security Group, or NACL from this design is claimed as deployed until deployment evidence is added to this repository.
+The VPC, subnet layout, routing, NAT Gateway, database isolation, Security Groups, and application traffic path are considered complete for the manual architecture phase. Resource IDs and screenshots remain documentation work for the evidence package.

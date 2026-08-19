@@ -1,0 +1,285 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: >
+  Arak AWS SAA Project - Network infrastructure.
+  Creates the VPC, public subnets, private application subnets,
+  private database subnets, Internet Gateway, NAT Gateway,
+  route tables, routes, and subnet associations.
+
+Resources:
+
+  # =========================
+  # VPC
+  # =========================
+
+  ArakVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: arak-vpc
+
+
+  # =========================
+  # Internet Gateway
+  # =========================
+
+  ArakInternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: arak-igw
+
+  ArakInternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref ArakVPC
+      InternetGatewayId: !Ref ArakInternetGateway
+
+
+  # =========================
+  # Public Subnets
+  # =========================
+
+  ArakPublicA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref ArakVPC
+      AvailabilityZone: us-east-1a
+      CidrBlock: 10.0.1.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: arak-public-a
+
+  ArakPublicB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref ArakVPC
+      AvailabilityZone: us-east-1b
+      CidrBlock: 10.0.2.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: arak-public-b
+
+
+  # =========================
+  # Private Application Subnets
+  # =========================
+
+  ArakAppA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref ArakVPC
+      AvailabilityZone: us-east-1a
+      CidrBlock: 10.0.11.0/24
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: arak-app-a
+
+  ArakAppB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref ArakVPC
+      AvailabilityZone: us-east-1b
+      CidrBlock: 10.0.12.0/24
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: arak-app-b
+
+
+  # =========================
+  # Private Database Subnets
+  # =========================
+
+  ArakDBA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref ArakVPC
+      AvailabilityZone: us-east-1a
+      CidrBlock: 10.0.21.0/24
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: arak-db-a
+
+  ArakDBB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref ArakVPC
+      AvailabilityZone: us-east-1b
+      CidrBlock: 10.0.22.0/24
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: arak-db-b
+
+
+  # =========================
+  # Public Route Table
+  # =========================
+
+  ArakPublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref ArakVPC
+      Tags:
+        - Key: Name
+          Value: arak-public-rt
+
+  ArakPublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: ArakInternetGatewayAttachment
+    Properties:
+      RouteTableId: !Ref ArakPublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref ArakInternetGateway
+
+  ArakPublicAAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref ArakPublicA
+      RouteTableId: !Ref ArakPublicRouteTable
+
+  ArakPublicBAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref ArakPublicB
+      RouteTableId: !Ref ArakPublicRouteTable
+
+
+  # =========================
+  # NAT Gateway
+  # =========================
+
+  ArakNatEIP:
+    Type: AWS::EC2::EIP
+    DependsOn: ArakInternetGatewayAttachment
+    Properties:
+      Domain: vpc
+      Tags:
+        - Key: Name
+          Value: arak-nat-eip
+
+  ArakNatGateway:
+    Type: AWS::EC2::NatGateway
+    DependsOn: ArakInternetGatewayAttachment
+    Properties:
+      AllocationId: !GetAtt ArakNatEIP.AllocationId
+      SubnetId: !Ref ArakPublicA
+      Tags:
+        - Key: Name
+          Value: arak-nat-a
+
+
+  # =========================
+  # Private Application Route Table
+  # =========================
+
+  ArakPrivateAppRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref ArakVPC
+      Tags:
+        - Key: Name
+          Value: arak-private-app-rt
+
+  ArakPrivateAppRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref ArakPrivateAppRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref ArakNatGateway
+
+  ArakAppAAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref ArakAppA
+      RouteTableId: !Ref ArakPrivateAppRouteTable
+
+  ArakAppBAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref ArakAppB
+      RouteTableId: !Ref ArakPrivateAppRouteTable
+
+
+  # =========================
+  # Private Database Route Table
+  # =========================
+
+  ArakPrivateDBRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref ArakVPC
+      Tags:
+        - Key: Name
+          Value: arak-private-db-rt
+
+  ArakDBAAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref ArakDBA
+      RouteTableId: !Ref ArakPrivateDBRouteTable
+
+  ArakDBBAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref ArakDBB
+      RouteTableId: !Ref ArakPrivateDBRouteTable
+
+
+Outputs:
+
+  VPCId:
+    Description: Arak VPC ID
+    Value: !Ref ArakVPC
+    Export:
+      Name: Arak-VPC-ID
+
+  PublicSubnetA:
+    Description: Public subnet in us-east-1a
+    Value: !Ref ArakPublicA
+    Export:
+      Name: Arak-Public-A
+
+  PublicSubnetB:
+    Description: Public subnet in us-east-1b
+    Value: !Ref ArakPublicB
+    Export:
+      Name: Arak-Public-B
+
+  AppSubnetA:
+    Description: Private application subnet in us-east-1a
+    Value: !Ref ArakAppA
+    Export:
+      Name: Arak-App-A
+
+  AppSubnetB:
+    Description: Private application subnet in us-east-1b
+    Value: !Ref ArakAppB
+    Export:
+      Name: Arak-App-B
+
+  DBSubnetA:
+    Description: Private database subnet in us-east-1a
+    Value: !Ref ArakDBA
+    Export:
+      Name: Arak-DB-A
+
+  DBSubnetB:
+    Description: Private database subnet in us-east-1b
+    Value: !Ref ArakDBB
+    Export:
+      Name: Arak-DB-B
+
+  NatGatewayId:
+    Description: NAT Gateway ID
+    Value: !Ref ArakNatGateway

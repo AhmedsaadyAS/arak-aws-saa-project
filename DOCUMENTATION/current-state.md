@@ -1,61 +1,93 @@
 # Current State
 
-## Application
+## Manual AWS Architecture
 
-Arak is an education-management SaaS application.
+The Arak AWS application has been migrated from the original single-EC2 prototype to a manually validated multi-tier AWS architecture.
 
-### Stack
+### Network
 
-- Frontend: React + Vite
-- Backend: ASP.NET Core on .NET 9
-- ORM: Entity Framework Core
-- Authentication: ASP.NET Identity with roles and JWT login
-- Database: SQL Server
-- Reverse proxy/web server: Nginx
-- Backend process management: systemd
+- VPC: `arak-vpc`
+- CIDR: `10.0.0.0/16`
+- Two Availability Zones:
+  - `us-east-1a`
+  - `us-east-1b`
+- Public, private application, and private database subnets are configured.
+- Internet Gateway configured.
+- NAT Gateway configured.
+- Private application routing configured.
+- Private database routing configured without an Internet default route.
 
-## Current AWS Prototype
+The current lab uses one NAT Gateway, `arak-nat-a`, for private application subnet outbound traffic. One NAT Gateway per AZ remains the production-oriented design target.
 
-The current deployment is a single Ubuntu EC2 instance used as a working prototype.
+### Compute
 
-The instance currently contains:
+- Application instances run in private subnets.
+- Auto Scaling Group: `arak-app-asg`.
+- Launch Template: `arak-app-template`.
+- Instance type: `t3.micro`.
+- Desired capacity: 1.
+- Minimum capacity: 1.
+- Maximum capacity: 2.
+- Systems Manager Session Manager is available for administration.
 
-- Nginx serving the React production build
-- ASP.NET Core API
-- SQL Server on the same host
+### Application
 
-The public request path is:
+- Docker-based deployment is used for the Arak Backend.
+- Image: `asdy74/arak-backend:v1`.
+- Container: `arak-api`.
+- Application port: `5000`.
+- `/health` returns HTTP `200 OK`.
+- Container health status has been validated.
 
-Internet → EC2 → Nginx → React / API
+### Database
 
-The API is internally proxied by Nginx to the ASP.NET Core process.
+- RDS SQL Server instance: `arak-db-2`.
+- DB subnet group: `arak-db-subnet-group`.
+- RDS is private.
+- Port: `1433`.
+- EC2 -> RDS connectivity validated.
+- Backend -> RDS connectivity validated.
+- Credentials are managed through Secrets Manager.
 
-## Important Prototype Status
+### Load Balancing
 
-This deployment is **not** the final SAA architecture.
+- Application Load Balancer: `arak-alb`.
+- Internet-facing.
+- Public subnets:
+  - `arak-public-a`
+  - `arak-public-b`
+- Target Group: `arak-app-tg`.
+- Backend targets use port `5000`.
+- Health check path: `/health`.
+- ALB DNS `/health` endpoint successfully returned HTTP `200 OK`.
 
-The current prototype does not yet verify the following final architecture components:
+### IAM
 
-- Application Load Balancer
-- Auto Scaling Group
-- Launch Template
-- Multi-AZ VPC design
-- Public/private subnet separation for the final application
-- NAT Gateway architecture
-- RDS Multi-AZ
-- CloudFront
-- Route 53
-- WAF
-- CloudWatch dashboards and SNS alerting
-- Systems Manager Session Manager design
-- Final IAM least-privilege architecture
+- IAM role: `ARAK-Production-EC2-Role`.
+- Attached to application EC2 instances through an Instance Profile.
+- Used for AWS service access from EC2.
+- Used for Secrets Manager access.
+- Used for Systems Manager administration.
+- No long-lived AWS access keys are stored on the instances.
 
-## Known Deployment Baseline
+## Current Validation
 
-The prototype was successfully configured to serve the frontend through Nginx and proxy `/api/` requests internally to the backend.
+The current application request path has been validated end-to-end:
 
-The prototype should be preserved as a fallback baseline while the final AWS architecture is built.
+```text
+Internet
+-> ALB
+-> Target Group
+-> Private EC2
+-> Docker
+-> Arak Backend
+-> RDS
+```
 
-## Security Note
+## Current Phase
 
-Credentials must never be committed to this repository. Any previously exposed credentials are treated as a security issue and must not be copied into documentation.
+The manual AWS architecture is complete.
+
+The project is now entering the Infrastructure as Code phase.
+
+CloudFormation networking has been validated through test stack `arak-network-test` with status `CREATE_COMPLETE`. The remaining IaC layers will be implemented incrementally based on the manually validated architecture.

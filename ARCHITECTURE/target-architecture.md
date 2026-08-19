@@ -8,13 +8,15 @@ Transform the existing Arak single-EC2 prototype into a scalable, highly availab
 
 Internet users will access Arak through an edge and load-balancing layer before reaching application instances in private subnets.
 
-Planned flow:
+Validated flow:
 
 1. Route 53 (optional, when a domain is available)
 2. CloudFront + WAF (where justified)
 3. Application Load Balancer in public subnets
 4. EC2 Auto Scaling Group across two Availability Zones in private subnets
-5. Managed SQL Server database in private database subnets with Multi-AZ deployment
+5. Managed SQL Server database in private database subnets
+
+The core flow through the ALB, Target Group, private Auto Scaling instances, Docker backend, and private RDS SQL Server has been manually validated. Route 53, CloudFront, and WAF remain optional services for the final scope.
 
 ## Network Design
 
@@ -46,9 +48,9 @@ The initial implementation strategy is to preserve the existing application depl
 
 ## Database Layer
 
-The current local SQL Server instance on the prototype EC2 will be migrated to Amazon RDS for SQL Server.
+The current local SQL Server instance on the prototype EC2 has been replaced for the validated architecture by Amazon RDS for SQL Server.
 
-The application will then use the RDS endpoint instead of a database process running on the EC2 host.
+The production application uses the RDS endpoint instead of a database process running on the EC2 host.
 
 ## Availability and Scalability
 
@@ -60,7 +62,7 @@ The application will then use the RDS endpoint instead of a database process run
 
 ## Security Controls
 
-Planned controls include:
+Validated controls include:
 
 - Security Groups with least-necessary traffic paths
 - NACLs for subnet-level controls where useful
@@ -71,7 +73,7 @@ Planned controls include:
 
 ## Observability
 
-Planned operational services:
+Planned operational services not yet completed:
 
 - CloudWatch metrics and logs
 - CloudWatch alarms
@@ -79,4 +81,23 @@ Planned operational services:
 
 ## Important Design Rule
 
-The final architecture is a target design until each component is actually deployed and verified. Documentation will be updated after every implementation milestone.
+The manual AWS architecture is complete and verified. The next implementation milestone is reproducing it with CloudFormation.
+
+## Implementation Status
+
+### Manually validated
+
+- Networking
+- Security Groups
+- RDS
+- EC2 Auto Scaling
+- Docker deployment
+- Application Load Balancer
+- Target Group
+- End-to-end health check
+
+### Infrastructure as Code
+
+CloudFormation implementation has started.
+
+The networking template was successfully deployed as `arak-network-test` in `us-east-1` with status `CREATE_COMPLETE`.

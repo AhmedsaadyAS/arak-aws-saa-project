@@ -60,3 +60,25 @@ The repository must clearly distinguish:
 - **Completed Evidence:** resources and tests that have been verified as implemented.
 
 Never mark an AWS component as completed without implementation evidence.
+
+## Implementation Status
+
+The core architecture has been manually implemented and validated.
+
+Implemented components include:
+
+- VPC
+- Public and private subnets
+- Internet Gateway
+- NAT Gateway
+- Security Groups
+- EC2 Auto Scaling Group
+- Launch Template
+- Dockerized ASP.NET Core backend
+- Amazon RDS for SQL Server
+- AWS Secrets Manager
+- Application Load Balancer
+- Target Group
+- End-to-end health validation
+
+CloudFormation implementation has also started with the networking layer. The `arak-network-test` stack reached `CREATE_COMPLETE` in the `us-east-1` test environment.

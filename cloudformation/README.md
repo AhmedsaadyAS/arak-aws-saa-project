@@ -1,36 +1,45 @@
 # AWS CloudFormation IaC
 
-This directory is the source of truth for recreating the Arak AWS SAA project infrastructure.
+This directory is the source of truth for recreating the manually validated Arak AWS Solutions Architect Associate architecture.
 
-## Purpose
+## Current Phase
 
-We build and validate the AWS architecture manually first so the concepts are understood. After each AWS component is completed, its CloudFormation equivalent will be added here.
+CloudFormation is being used to reproduce the manually validated AWS architecture. The manual architecture is complete, while Infrastructure as Code is partially complete.
 
-The final goal is to be able to delete the lab environment and recreate the complete architecture from this code before the project demonstration, then delete the deployed resources again to avoid unnecessary ongoing AWS costs.
+The IaC objective is to recreate the environment from code, validate each layer, capture evidence, and remove lab resources when they are no longer required.
 
-## Workflow
+## Network Template Deployment Evidence
 
-1. Design the component.
-2. Build it manually in AWS.
-3. Validate it.
-4. Document the real configuration and relationships.
-5. Add the CloudFormation code here.
-6. Review the code before deployment.
-7. Test CloudFormation deployment.
-8. Capture project evidence.
-9. Recreate the full environment from CloudFormation before the final demo.
-10. Delete the stack/resources after the demo.
+The `network.yaml` template was successfully validated and deployed in the AWS test environment.
 
-## Planned files
+- Test stack: `arak-network-test`
+- Region: `us-east-1`
+- Deployment result: `CREATE_COMPLETE`
+- Validation: CloudFormation Resources view confirmed the created VPC, subnets, route tables, routes, subnet associations, Internet Gateway, NAT Gateway, and Elastic IP.
+- Evidence: AWS CloudFormation Resources screenshot captured after deployment.
 
-- `network.yaml` — VPC, subnets, route tables, gateways and networking resources.
-- `security.yaml` — Security Groups and related security resources.
-- `database.yaml` — RDS and database networking configuration.
-- `compute.yaml` — Launch Template and Auto Scaling resources.
-- `load-balancer.yaml` — ALB, target groups and listeners.
-- `monitoring.yaml` — CloudWatch and monitoring resources.
-- `main.yaml` — Final orchestration/entry point if the architecture benefits from nested or modular stacks.
-## Current state
+The test stack is intentionally being kept temporarily as proof of deployment. It must not be deleted until the evidence and validation review is complete.
+
+## Validated CloudFormation Resources
+
+### Networking
+
+- Template: `network.yaml`
+- Test stack: `arak-network-test`
+- Region: `us-east-1`
+- Status: `CREATE_COMPLETE`
+- Result: networking foundation successfully created and verified in the AWS Console.
+
+## Current IaC Status
+
+| Layer | Template | Status |
+|---|---|---|
+| Network | `network.yaml` | Validated |
+| Security | `security.yaml` | Created, not yet validated |
+| Database | `database.yaml` | Not implemented |
+| Compute | `compute.yaml` | Not implemented |
+| Load Balancer | `load-balancer.yaml` | Not implemented |
+| Monitoring | `monitoring.yaml` | Not implemented |
 
 ## Current Architecture Progress
 
@@ -44,156 +53,121 @@ The final goal is to be able to delete the lab environment and recreate the comp
 
 ### Compute
 
-- Launch Template created.
-- Auto Scaling Group created.
+- Launch Template created: `arak-app-template`.
+- AMI: Amazon Linux 2023.
+- Instance type: `t3.micro`.
+- IAM instance profile: `ARAK-Production-EC2-Role`.
+- Security Group: `arak-app-sg`.
+- Auto Scaling Group created: `arak-app-asg`.
+- Desired capacity: 1.
+- Minimum capacity: 1.
+- Maximum capacity: 2.
 - Application instances are deployed in private App subnets.
-- Current desired capacity is 1 instance.
-- Scaling range is 1–2 instances.
-- SSM access configured and validated for private application instances.
-- Docker installed on the production application instances.
-- Production instances do not require public IP addresses.
+- Auto Scaling Instance Refresh completed successfully.
 
 ### Application
 
-- Arak Backend containerized successfully.
-- Docker image published to Docker Hub:
-  - `asdy74/arak-backend:v1`
-- Production EC2 successfully pulled the backend image from Docker Hub.
-- Backend exposes an unauthenticated `/health` endpoint.
-- Backend container was successfully started on the production EC2.
-- Production backend deployment is currently blocked only by the pending production database connection.
+- Docker installed on application instances.
+- Backend image: `asdy74/arak-backend:v1`.
+- Container: `arak-api`.
+- Application port: `5000`.
+- Backend `/health` endpoint validated successfully.
+- Container health status validated as healthy.
 
 ### Database
 
-- Private database subnets are ready.
-- `arak-db-a` and `arak-db-b` are available for the database layer.
-- `arak-db-sg` has been created for the database layer.
-- Production RDS SQL Server has not been created yet.
-- The previous `arak-sqlserver` Docker container belongs to the test environment and is not part of the production architecture.
-- Production application configuration must use the RDS endpoint after the RDS layer is created.
+- Amazon RDS for SQL Server created.
+- DB identifier: `arak-db-2`.
+- DB instance class: `db.t3.micro`.
+- DB subnet group: `arak-db-subnet-group`.
+- Database subnets:
+	- `arak-db-a`
+	- `arak-db-b`
+- RDS is not publicly accessible.
+- EC2 -> RDS connectivity validated.
+- Backend -> RDS connectivity validated.
+- RDS credentials are managed through AWS Secrets Manager.
 
-### Load Balancing
+### Load Balancer
 
-- Application Load Balancer architecture is planned.
-- Target Group will forward traffic to the ASG application instances.
-- ALB → Target Group → ASG remains the intended production traffic flow.
+- Application Load Balancer created: `arak-alb`.
+- Scheme: Internet-facing.
+- IPv4.
+- Public subnets:
+	- `arak-public-a`
+	- `arak-public-b`
+- Target Group created: `arak-app-tg`.
+- Target type: Instance.
+- Protocol: HTTP.
+- Target port: `5000`.
+- Health check path: `/health`.
+- Two application instances registered.
+- ALB -> Target Group -> EC2 routing validated.
+- ALB DNS `/health` request returned HTTP `200 OK`.
 
-### Next
+## Current State
 
-- Create Amazon RDS for SQL Server.
-- Configure the RDS DB Subnet Group using `arak-db-a` and `arak-db-b`.
-- Configure RDS Security Group access from `arak-app-sg` on TCP port `1433`.
-- Validate Application → RDS connectivity.
-- Update Launch Template with the production backend startup/configuration.
-- Create Target Group.
-- Create Application Load Balancer.
-- Connect ALB → Target Group → ASG.
-- Validate the complete production application flow.
+The AWS architecture has been manually implemented and validated.
 
-### Completed manually
+The complete application path is currently:
 
-- VPC: `10.0.0.0/16`
-- Six subnets across two Availability Zones
-- Internet Gateway attached to the VPC
-- Public route table
-- Public default route: `0.0.0.0/0` -> Internet Gateway
-  - NAT Gateway: `arak-nat-a`
-  - Type: Public NAT Gateway
-  - Subnet: `arak-public-a`
-  - Elastic IP: allocated
-  - Purpose: provide outbound Internet access for private application subnets
-- Private App Route Table: `arak-private-app-rt`
-  - Associated with `arak-app-a` and `arak-app-b`
-  - Default route: `0.0.0.0/0` → `arak-nat-a`
-- Private DB Route Table: `arak-private-db-rt`
-  - Associated with `arak-db-a` and `arak-db-b`
-  - No Internet default route
-- 3 Security Groups created:
-  - `arak-alb-sg` — HTTP traffic from the Internet to the ALB
-  - `arak-app-sg` — application traffic from the ALB only
-  - `arak-db-sg` — SQL Server traffic from the application layer only
-- Compute Layer:
-  1. Launch Template: `arak-app-template`
-  2. AMI: Amazon Linux 2023
-  3. Instance type: `t3.micro`
-  4. Security Group: `arak-app-sg`
-  5. Auto Scaling Group: `arak-app-asg`
-  6. Desired capacity: 1
-  7. Minimum capacity: 1
-  8. Maximum capacity: 2
-  9. App subnets: `arak-app-a`, `arak-app-b`
-  10. Availability Zones: `us-east-1a`, `us-east-1b`
-  11. Health check: EC2
-- Application Layer:
-  1. Docker installed on production instances
-  2. Docker Hub image: `asdy74/arak-backend:v1`
-  3. Backend health endpoint: `/health`
-  4. SSM access validated
-- Database Layer:
-  1. Database subnets: `arak-db-a`, `arak-db-b`
-  2. Database Security Group: `arak-db-sg`
-  3. RDS SQL Server: pending
+```text
+Internet
+-> Application Load Balancer
+-> Target Group
+-> Private EC2 Auto Scaling Group
+-> Docker
+-> Arak Backend
+-> Private RDS SQL Server
+```
 
-### CloudFormation status
+CloudFormation is intentionally being implemented after manual validation of the corresponding AWS components.
 
-Templates are being created incrementally. We will not add placeholder infrastructure just for the sake of filling files; each template should correspond to an understood and validated AWS component.
+## Next Phase
 
-Next CloudFormation items:
+The remaining CloudFormation implementation will be created incrementally:
 
-- Translate NAT Gateway into CloudFormation
-- Translate private application routing into CloudFormation
-- Translate private database routing into CloudFormation
-- Validate the complete networking stack through CloudFormation
-- Translate Security Groups into CloudFormation
-- Validate Security Group rules through CloudFormation
-- Translate the database layer into CloudFormation after RDS is manually created and validated
-- Translate the compute/application deployment configuration into CloudFormation
-- Translate the ALB and Target Group into CloudFormation
-### Completed manually
+1. Validate `security.yaml`.
+2. Create and validate `database.yaml`.
+3. Create and validate `compute.yaml`.
+4. Create and validate `load-balancer.yaml`.
+5. Create and validate `monitoring.yaml`.
+6. Create the final `main.yaml` orchestration entry point if needed.
 
-- VPC: `10.0.0.0/16`
-- Six subnets across two Availability Zones
-- Internet Gateway attached to the VPC
-- Public route table
-- Public default route: `0.0.0.0/0` -> Internet Gateway
-  - NAT Gateway: `arak-nat-a`
-  - Type: Public NAT Gateway
-  - Subnet: `arak-public-a`
-  - Elastic IP: allocated
-  - Purpose: provide outbound Internet access for private application subnets
-- Private App Route Table: `arak-private-app-rt`
-  - Associated with `arak-app-a` and `arak-app-b`
-  - Default route: `0.0.0.0/0` → `arak-nat-a`
-- Private DB Route Table: `arak-private-db-rt`
-  - Associated with `arak-db-a` and `arak-db-b`
-  - No Internet default route
-  - 
-  - 3 Security Groups created:
-  - `arak-alb-sg` — HTTP traffic from the Internet to the ALB
-  - `arak-app-sg` — application traffic from the ALB only
-  - `arak-db-sg` — SQL Server traffic from the application layer only
- 
-  - - Compute Layer:
-  - Launch Template: `arak-app-template`
-  - AMI: Amazon Linux 2023
-  - Instance type: `t3.micro`
-  - Security Group: `arak-app-sg`
-  - Auto Scaling Group: `arak-app-asg`
-  - Desired capacity: 1
-  - Minimum capacity: 1
-  - Maximum capacity: 2
-  - App subnets: `arak-app-a`, `arak-app-b`
-  - Availability Zones: `us-east-1a`, `us-east-1b`
-  - Health check: EC2
+Each template will be validated before moving to the next layer.
 
-### CloudFormation status
+## Planned Templates
 
-Templates are being created incrementally. We will not add placeholder infrastructure just for the sake of filling files; each template should correspond to an understood and validated AWS component.
+- `network.yaml` - VPC, subnets, route tables, gateways, and networking resources.
+- `security.yaml` - Security Groups and related security resources.
+- `database.yaml` - RDS, DB subnet group, and database networking configuration.
+- `compute.yaml` - IAM role, Launch Template, Auto Scaling Group, and instance configuration.
+- `load-balancer.yaml` - ALB, Target Group, listeners, and health checks.
+- `monitoring.yaml` - CloudWatch dashboards, alarms, and SNS notifications.
+- `main.yaml` - Final orchestration entry point for modular or nested stacks.
 
-Next networking item: NAT Gateway and private application routing.
-- [ ] Translate NAT Gateway into CloudFormation
-- [ ] Translate private application routing into CloudFormation
-- [ ] Translate private database routing into CloudFormation
-- [ ] Validate the complete networking stack through CloudFormation
-- [ ] Translate Security Groups into CloudFormation
-- [ ] Validate Security Group rules through CloudFormation
+## Implementation Workflow
+
+1. Review the validated networking deployment.
+2. Validate the Security Groups template without claiming existing manual groups are managed by it.
+4. Translate and validate RDS and database networking.
+5. Translate and validate the IAM role, Launch Template, and Auto Scaling Group.
+6. Translate and validate the ALB, Target Group, listeners, and health checks.
+7. Add monitoring and alerting resources.
+8. Add the final orchestration stack where useful.
+9. Deploy the complete architecture from CloudFormation.
+10. Validate the recreated environment end to end.
+11. Capture deployment and validation evidence.
+12. Delete the CloudFormation stack after the demonstration when resources are no longer required.
+
+## Status Rule
+
+A CloudFormation resource is complete only after its template has been reviewed, deployed, and validated. Manual AWS completion does not by itself mark the corresponding IaC template complete.
+
+## Immediate Next Step
+
+Proceed to the Security Groups template after the successful `network.yaml` deployment, then continue upward through:
+
+```text
+Network -> Security -> Database -> Compute -> Load Balancer -> Monitoring
+```

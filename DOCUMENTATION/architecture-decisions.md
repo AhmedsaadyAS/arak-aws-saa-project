@@ -26,21 +26,23 @@ This file records important design decisions for the Arak AWS Solutions Architec
 
 **Arak consideration:** The existing application uses SQL Server, so the initial database strategy remains SQL Server unless a later documented decision changes it.
 
+**Status:** Implemented and validated with Amazon RDS for SQL Server.
+
 ## ADR-004 — Use Two Availability Zones
 
-**Decision:** The final architecture will span two Availability Zones.
+**Decision:** The final architecture spans two Availability Zones.
 
 **Reason:** The selected project explicitly requires a VPC with public and private subnets across two Availability Zones and targets high availability.
 
 ## ADR-005 — Put ALB in Public Subnets and EC2 in Private Subnets
 
-**Decision:** The Internet-facing Application Load Balancer will use public subnets, while Auto Scaling EC2 instances will use private application subnets.
+**Decision:** The Internet-facing Application Load Balancer uses public subnets, while Auto Scaling EC2 instances use private application subnets.
 
 **Reason:** This separates Internet ingress from application compute and prevents direct public access to the EC2 instances.
 
 ## ADR-006 — Use NAT Gateway for Private Application Egress
 
-**Decision:** The target architecture uses NAT Gateway(s) in public subnets for controlled outbound Internet access from private application subnets.
+**Decision:** The validated architecture uses a NAT Gateway in a public subnet for controlled outbound Internet access from private application subnets.
 
 **Reason:** Private instances may need outbound access for updates and operational dependencies without becoming directly Internet-addressable.
 
@@ -54,8 +56,18 @@ This file records important design decisions for the Arak AWS Solutions Architec
 
 ## ADR-008 — Build Incrementally
 
-**Decision:** Do not deploy all AWS services at once.
+**Decision:** Build and validate the AWS architecture incrementally, then reproduce it with Infrastructure as Code.
 
 **Reason:** Each layer should be validated before the next layer is introduced. This reduces troubleshooting complexity and provides clear evidence for the final project documentation.
 
-**Implementation sequence:** Networking → database → application baseline → ALB → Launch Template → Auto Scaling → security/operations → CloudFront/WAF/Route 53 where justified.
+**Implementation sequence:** Networking → security → database → compute → ALB → end-to-end validation → CloudFormation → monitoring → CloudFront/WAF/Route 53 where justified.
+
+## ADR-009 — Use IAM Roles Instead of AWS Access Keys
+
+**Decision:** Use an IAM role attached to the EC2 instances through an Instance Profile.
+
+**Reason:** EC2 instances need AWS permissions to retrieve database credentials from Secrets Manager and use Systems Manager. An IAM role avoids storing long-lived AWS access keys on application servers.
+
+**Implementation:** IAM role `ARAK-Production-EC2-Role` is associated with the application EC2 instances through the Launch Template.
+
+**Status:** Implemented and validated.

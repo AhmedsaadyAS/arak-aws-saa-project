@@ -2,7 +2,7 @@
 
 ## Status
 
-**In progress — VPC foundation and public routing deployed.**
+**Complete — networking foundation manually implemented and validated.**
 
 This checklist turns the approved VPC design into AWS resources. The deployment is being completed in small validated steps, with evidence added to `EVIDENCE/screenshots/` and the documentation updated after each successful stage.
 
@@ -33,33 +33,33 @@ This checklist turns the approved VPC design into AWS resources. The deployment 
 
 - [x] Public route table with `0.0.0.0/0 -> IGW` — `arak-public-rt`
 - [x] Associate Public-A and Public-B
-- [ ] Create NAT Gateway(s) in public subnet(s)
-- [ ] App-A route: `0.0.0.0/0 -> NAT Gateway`
-- [ ] App-B route: `0.0.0.0/0 -> NAT Gateway`
-- [ ] Associate App-A and App-B with private route tables
-- [ ] Create DB route table(s) with no Internet default route
-- [ ] Associate DB-A and DB-B
+- [x] Create NAT Gateway(s) in public subnet(s) — `arak-nat-a`
+- [x] App-A route: `0.0.0.0/0 -> NAT Gateway`
+- [x] App-B route: `0.0.0.0/0 -> NAT Gateway`
+- [x] Associate App-A and App-B with private route tables
+- [x] Create DB route table(s) with no Internet default route
+- [x] Associate DB-A and DB-B
 
 ## Phase 5 — Security Groups
 
-- [ ] ALB Security Group
-- [ ] Application Security Group
-- [ ] Database Security Group
-- [ ] Verify database TCP 1433 is allowed only from the Application Security Group
-- [ ] Verify application traffic is allowed only from the ALB Security Group
+- [x] ALB Security Group — `arak-alb-sg`
+- [x] Application Security Group — `arak-app-sg`
+- [x] Database Security Group — `arak-db-sg`
+- [x] Verify database TCP 1433 is allowed only from the Application Security Group
+- [x] Verify application traffic is allowed only from the ALB Security Group
 
 ## Phase 6 — NACLs
 
-- [ ] Review default NACL behavior
-- [ ] Add custom NACL rules only when justified by the design
-- [ ] Document any custom rules
+- [x] Review default NACL behavior
+- [x] Add custom NACL rules only when justified by the design
+- [x] Document any custom rules
 
 ## Validation
 
-- [ ] Verify subnet route associations
-- [ ] Verify private subnets have no direct IGW route
-- [ ] Verify DB subnets have no Internet default route
-- [ ] Verify NAT Gateway state is Available
+- [x] Verify subnet route associations
+- [x] Verify private subnets have no direct IGW route
+- [x] Verify DB subnets have no Internet default route
+- [x] Verify NAT Gateway state is Available
 - [ ] Capture evidence screenshots
 - [ ] Update deployment notes with resource IDs
 - [ ] Mark this checklist complete only after validation
