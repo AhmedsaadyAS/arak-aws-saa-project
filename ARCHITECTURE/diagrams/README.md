@@ -4,7 +4,7 @@ This directory contains the final visual representation of the validated ARAK AW
 
 ## Final Architecture Diagram
 
-![ARAK AWS Solution Architecture](./arak-aws-architecture.svg)
+![ARAK AWS Solution Architecture](./aws.jfif)
 
 The diagram presents the target architecture and the implementation details that are relevant to the project, including the VPC, Availability Zones, subnet CIDRs, NAT Gateway, Application Load Balancer, Target Group, Auto Scaling Group, Dockerized ASP.NET Core application, private RDS for SQL Server, security and management services, and monitoring.
 
