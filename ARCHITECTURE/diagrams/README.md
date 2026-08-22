@@ -6,7 +6,7 @@ This directory contains the final visual representation of the validated ARAK AW
 
 ![ARAK AWS Solution Architecture](./aws.jfif)
 
-The diagram presents the target architecture and the implementation details that are relevant to the project, including the VPC, Availability Zones, subnet CIDRs, NAT Gateway, Application Load Balancer, Target Group, Auto Scaling Group, Dockerized ASP.NET Core application, private RDS for SQL Server, security and management services, and monitoring.
+The original project architecture image is used as the source-of-truth visual diagram. It presents the target architecture and implementation details relevant to the project, including the VPC, Availability Zones, subnet CIDRs, NAT Gateway, Application Load Balancer, Target Group, Auto Scaling Group, Dockerized ASP.NET Core application, private RDS for SQL Server, security and management services, and monitoring.
 
 ## Network Layout
 
@@ -81,4 +81,4 @@ The primary request path shown in the diagram is:
 
 ## Source of Truth
 
-The diagram is a visual summary. Detailed implementation status, validation evidence, architecture decisions, and deployment procedures remain in the repository's corresponding documentation files.
+The `aws.jfif` image in this directory is the original project architecture diagram and is the visual source of truth. The accompanying documentation explains the architecture elements and implementation details.
