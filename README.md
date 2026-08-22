@@ -31,7 +31,7 @@ The validated architecture includes:
 
 ## AWS Solution Architecture Diagram
 
-![ARAK AWS Solution Architecture](ARCHITECTURE/diagrams/arak-aws-architecture.svg)
+![ARAK AWS Solution Architecture](ARCHITECTURE/diagrams/aws.jfif)
 
 The diagram provides the final visual overview of the ARAK AWS architecture, including the VPC layout, subnet CIDRs, ALB and Target Group, Auto Scaling application tier, private Multi-AZ RDS database, NAT Gateway, security and management services, and monitoring components.
 
@@ -57,7 +57,7 @@ For the detailed diagram documentation, see [`ARCHITECTURE/diagrams/README.md`](
 │   ├── target-architecture.md
 │   └── diagrams/
 │       ├── README.md
-│       └── arak-aws-architecture.svg
+│       └── aws.jfif
 ├── DOCUMENTATION/
 │   ├── current-state.md
 │   ├── architecture-decisions.md
