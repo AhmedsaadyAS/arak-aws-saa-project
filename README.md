@@ -29,6 +29,14 @@ The validated architecture includes:
 - CloudWatch monitoring and SNS notifications
 - CloudFront, WAF, and Route 53 where justified by the final design
 
+## AWS Solution Architecture Diagram
+
+![ARAK AWS Solution Architecture](ARCHITECTURE/diagrams/arak-aws-architecture.svg)
+
+The diagram provides the final visual overview of the ARAK AWS architecture, including the VPC layout, subnet CIDRs, ALB and Target Group, Auto Scaling application tier, private Multi-AZ RDS database, NAT Gateway, security and management services, and monitoring components.
+
+For the detailed diagram documentation, see [`ARCHITECTURE/diagrams/README.md`](ARCHITECTURE/diagrams/README.md).
+
 ## Application Stack
 
 - Frontend: React + Vite
@@ -48,6 +56,8 @@ The validated architecture includes:
 ├── ARCHITECTURE/
 │   ├── target-architecture.md
 │   └── diagrams/
+│       ├── README.md
+│       └── arak-aws-architecture.svg
 ├── DOCUMENTATION/
 │   ├── current-state.md
 │   ├── architecture-decisions.md
