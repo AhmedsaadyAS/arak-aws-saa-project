@@ -1,37 +1,87 @@
-# Security
+# Security Architecture
 
-## Security Group Flow
+## Security Boundary
 
 ```text
-Internet -> arak-alb-sg -> arak-app-sg -> arak-db-sg
+Internet
+   |
+   v
+Route 53
+   |
+   v
+CloudFront + WAF
+   |
+   v
+ALB
+   |
+   v
+Private EC2
+   |
+   v
+Private RDS
 ```
 
-### `arak-alb-sg`
+## Security Groups
 
-The public entry point allows TCP `80` from the Internet to the Application Load Balancer.
+### ALB Security Group
 
-### `arak-app-sg`
+Allows HTTP/HTTPS traffic from the public edge.
 
-Allows TCP `5000` from `arak-alb-sg` only. The application port is not exposed directly to the Internet.
+### Application Security Group
 
-### `arak-db-sg`
+Allows TCP `5000` only from the ALB Security Group.
 
-Allows TCP `1433` from `arak-app-sg` only. SQL Server is not exposed publicly.
+### Database Security Group
+
+Allows TCP `1433` only from the Application Security Group.
+
+## WAF
+
+AWS WAF is positioned at the public web layer.
+
+Recommended controls:
+
+- AWS Managed Rules
+- Common web exploit protection
+- Known bad input protection
+- Rate-based rule
+- Logging for security analysis
 
 ## IAM
 
-The application EC2 instances use the IAM role `ARAK-Production-EC2-Role`, attached through an IAM Instance Profile.
+EC2 uses an IAM role through an Instance Profile.
 
-The role provides AWS permissions required by the application instances without storing AWS access keys on the servers.
+The role provides the minimum AWS permissions required for:
 
-### Secrets Manager Access
+- Secrets Manager
+- Systems Manager
+- CloudWatch/operational integration where required
 
-The EC2 role allows the application instance to retrieve RDS database credentials from AWS Secrets Manager at runtime. Database credentials are not hardcoded in the application image or stored in Git.
+Long-lived AWS access keys are not stored on application instances.
 
-### Systems Manager
+## Secrets Manager
 
-The EC2 instances use the IAM role required for AWS Systems Manager Session Manager administration. This allows administrative access without a public IP or direct SSH access.
+Database credentials are stored in Secrets Manager and retrieved at runtime.
+
+Secrets are never committed to Git.
+
+## Systems Manager
+
+Session Manager provides bastion-free administration.
+
+The application instances remain private and do not require public SSH access.
 
 ## NACLs
 
-NACLs provide subnet-level defense in depth where justified. Security Groups remain the primary workload-level firewall.
+NACLs provide subnet-level defense in depth.
+
+Security Groups remain the primary resource-level firewall.
+
+## Encryption
+
+The design uses:
+
+- HTTPS/TLS at the public edge
+- RDS encryption at rest
+- S3 server-side encryption for frontend assets
+- Secrets Manager for sensitive credentials
