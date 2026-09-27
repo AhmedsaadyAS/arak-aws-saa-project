@@ -4,11 +4,11 @@ This directory contains the main visual solution architecture diagram and the tw
 
 ## Main Solution Architecture
 
-![ARAK AWS Solution Architecture](./aws.svg)
+![ARAK AWS Solution Architecture](./aws.jfif)
 
 The main diagram represents the complete target solution architecture: public edge, VPC segmentation, two Availability Zones, ALB, EC2 Auto Scaling, RDS Multi-AZ, NAT gateways, security/management services, and monitoring.
 
-The editable vector version is available as [aws.svg](./aws.svg).
+The editable vector version is available as [aws.svg](./aws.svg), while the original visual version is displayed above.
 
 The earlier visual version is also preserved in Git history: [view the original diagram](https://github.com/AhmedsaadyAS/arak-aws-saa-project/blob/8ae1ad017ba71700535d7df86e661373336e2aa8/ARCHITECTURE/diagrams/aws.jfif).
 
