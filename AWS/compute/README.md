@@ -53,7 +53,7 @@ Primary scaling policy:
 - Scale-out: automatic when demand requires additional capacity
 - Scale-in: automatic when capacity is no longer required
 
-AWS documents target tracking as a policy that automatically adjusts Auto Scaling capacity around a target metric value. citeturn0search1
+AWS documents target tracking as a policy that automatically adjusts Auto Scaling capacity around a target metric value.
 
 ## Step Scaling Policy
 
@@ -68,7 +68,7 @@ Example scale-out thresholds:
 
 The policy should use CloudWatch alarms and cooldown/warmup settings that prevent rapid oscillation.
 
-Target tracking should remain the primary policy. AWS recommends caution when combining target tracking and step scaling because policies can conflict. citeturn0search0turn0search11
+Target tracking should remain the primary policy. AWS recommends caution when combining target tracking and step scaling because policies can conflict.
 
 ## Load Balancer Health
 
