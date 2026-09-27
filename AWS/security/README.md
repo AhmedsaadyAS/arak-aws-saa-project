@@ -25,7 +25,7 @@ Private RDS
 
 ### ALB Security Group
 
-Allows HTTP/HTTPS traffic from the public edge.
+Allows HTTPS traffic from the CloudFront origin-facing managed prefix list. A secret CloudFront origin header can be used as an additional origin-access control. Direct public access to the ALB is not part of the intended request path.
 
 ### Application Security Group
 
