@@ -43,6 +43,10 @@ The public application uses HTTPS.
 
 The design includes an ACM certificate for the application domain and CloudFront HTTPS enforcement.
 
+## Origin Protection
+
+The ALB is protected so that application traffic is expected to enter through CloudFront. The design can use the AWS-managed CloudFront origin-facing prefix list on the ALB Security Group and a secret custom CloudFront origin header as defense in depth. AWS documents both approaches for restricting direct access to an internet-facing ALB origin.
+
 ## Security Objective
 
 The edge layer provides:
