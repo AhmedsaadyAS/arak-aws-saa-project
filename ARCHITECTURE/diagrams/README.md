@@ -10,6 +10,8 @@ The main diagram represents the complete target solution architecture: public ed
 
 The editable vector version is available as [aws.svg](./aws.svg).
 
+The earlier visual version is also preserved in Git history: [view the original diagram](https://github.com/AhmedsaadyAS/arak-aws-saa-project/blob/8ae1ad017ba71700535d7df86e661373336e2aa8/ARCHITECTURE/diagrams/aws.jfif).
+
 ## Verified Architecture Values
 
 - Region: `us-east-1`
