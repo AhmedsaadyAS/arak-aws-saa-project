@@ -4,11 +4,7 @@
 
 The existing Arak frontend is built with React and Vite.
 
-The production build produces static assets that do not require a running application server.
-
-## Amazon S3
-
-The production React/Vite build is served by the existing Nginx web layer on the application instances. CloudFront sits in front of the ALB and caches static frontend assets at the edge.
+The production build produces static assets that are served by the Nginx web layer on the private application instances.
 
 ## CloudFront Flow
 
@@ -28,6 +24,8 @@ Application Load Balancer
 Nginx / React + ASP.NET Core API
 ```
 
+CloudFront caches static frontend assets at the edge while forwarding application requests to the ALB origin.
+
 ## API Integration
 
 Frontend API requests use the same application domain and are routed through CloudFront to the Application Load Balancer.
@@ -42,11 +40,11 @@ CloudFront
 ALB
      |
      v
-ASP.NET Core API
+ASP.NET Core API :5000
 ```
 
 ## Benefits
 
 - Static assets are cached at edge locations.
-- Frontend compute is separated from backend compute.
+- Frontend and backend are delivered through the same public edge.
 - The API remains behind the ALB and private EC2 instances.
