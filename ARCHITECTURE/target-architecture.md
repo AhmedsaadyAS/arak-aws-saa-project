@@ -18,31 +18,27 @@ The architecture follows the selected Manara project:
                               |
                               v
                      CloudFront + AWS WAF
-                        /              \
-                       /                \
-                      v                  v
-              Amazon S3             Application
-           React/Vite Frontend      Load Balancer
-                                        |
-                                        v
-                                   Target Group
-                                        |
-                         +--------------+--------------+
-                         |                             |
-                         v                             v
-                    EC2 / AZ-1                    EC2 / AZ-2
-                         |                             |
-                         +--------------+--------------+
-                                        |
-                                        v
-                              ASP.NET Core API
-                                        |
-                                        v
-                              Amazon RDS SQL Server
-                             Multi-AZ private database
+                              |
+                              v
+                    Application Load Balancer
+                              |
+                              v
+                         Target Group
+                       /              \
+                      v                v
+                 EC2 / AZ-1       EC2 / AZ-2
+                      |                |
+                      +-------+--------+
+                              |
+                     React/Vite + Nginx
+                     ASP.NET Core API :5000
+                              |
+                              v
+                    Amazon RDS SQL Server
+                       Multi-AZ private DB
 ```
 
-CloudFront supports multiple origins, including S3 and Application Load Balancers, making it suitable for separating static frontend delivery from dynamic API traffic while keeping a common public entry point.
+The public edge uses Route 53, CloudFront, and AWS WAF. CloudFront forwards application traffic to the ALB, which distributes requests to the private EC2 Auto Scaling Group.
 
 ## DNS and Edge Layer
 
@@ -50,7 +46,7 @@ CloudFront supports multiple origins, including S3 and Application Load Balancer
 
 Route 53 provides the public DNS entry for the application.
 
-An alias record points the application domain to the CloudFront distribution. AWS documents Route 53 alias records as the standard way to route a domain to a CloudFront distribution.
+An alias record points the application domain to the CloudFront distribution.
 
 ### CloudFront
 
@@ -60,11 +56,12 @@ CloudFront provides:
 - Static asset caching
 - TLS termination
 - A common public entry point
-- Separate origins for frontend and API traffic
+
+The Application Load Balancer is the application origin for both frontend and API traffic.
 
 ### AWS WAF
 
-WAF protects the public web layer with managed and application-specific rules.
+WAF protects the CloudFront distribution with managed and application-specific rules.
 
 Recommended rule categories:
 
@@ -75,9 +72,8 @@ Recommended rule categories:
 
 ## VPC Design
 
+**VPC:** `arak-vpc`  
 **CIDR:** `10.0.0.0/16`
-
-The VPC spans two Availability Zones.
 
 | Tier | AZ-1 | AZ-2 | Purpose |
 |---|---|---|---|
@@ -116,16 +112,17 @@ The database route tables contain the local VPC route only and do not provide di
 
 The application tier is designed as replaceable compute.
 
-- Launch Template
+- Launch Template: `arak-app-template`
 - Amazon Linux 2023
 - Dockerized ASP.NET Core API
+- React/Vite + Nginx frontend
 - Port `5000`
 - Minimum capacity: 2
 - Desired capacity: 2
 - Maximum capacity: 6
 - Health check type: ELB
-
-The instances do not receive public IP addresses.
+- Private application subnets in two AZs
+- No public IP addresses
 
 ### Application Load Balancer
 
@@ -133,8 +130,8 @@ The ALB:
 
 - Is internet-facing
 - Runs across the two public subnets
-- Receives HTTP/HTTPS traffic from the edge layer
-- Routes API requests to the target group
+- Receives HTTPS application traffic from the edge layer
+- Routes requests to the target group
 - Performs health checks on `/health`
 - Sends traffic only to healthy application targets
 
@@ -148,20 +145,18 @@ The Auto Scaling Group automatically adds capacity when demand increases and rem
 
 ### Advanced Policy — Step Scaling
 
-Step scaling is reserved for exceptional load thresholds where a more aggressive response is desirable.
-
-Example design:
+Step scaling is documented for exceptional load thresholds.
 
 | Alarm condition | Adjustment |
 |---|---:|
 | CPU > 70% | +1 instance |
 | CPU > 85% | +2 instances |
 
-Scale-in should remain controlled by the primary target-tracking policy or by a separately designed scale-in mechanism to avoid conflicting instructions. AWS recommends caution when combining target tracking and step scaling.
+The policies are designed with separated responsibilities to avoid conflicting scaling behavior.
 
 ## Database Tier
 
-Amazon RDS for SQL Server provides the managed relational database layer.
+Amazon RDS for SQL Server provides the managed relational database layer for Arak.
 
 Design:
 
@@ -174,7 +169,7 @@ Design:
 - Automated backups
 - Multi-AZ deployment
 
-RDS Multi-AZ uses a synchronized standby in another Availability Zone and can automatically fail over while preserving the database endpoint.
+RDS Multi-AZ provides a standby database in another Availability Zone and supports automatic failover while retaining the database endpoint.
 
 ## Security Model
 
@@ -198,7 +193,7 @@ RDS SQL Server
 
 Security Groups:
 
-- **ALB SG:** allow HTTP/HTTPS from the public edge.
+- **ALB SG:** allow HTTPS from the CloudFront origin-facing infrastructure.
 - **App SG:** allow TCP `5000` only from ALB SG.
 - **DB SG:** allow TCP `1433` only from App SG.
 
@@ -229,10 +224,10 @@ SNS distributes important alarm notifications.
 
 ## Availability Model
 
-The solution removes major single-instance dependencies:
+The solution is distributed across two Availability Zones:
 
-- ALB spans two AZs.
-- Application instances span two AZs.
+- ALB spans two public subnets.
+- Application instances span two private application subnets.
 - Auto Scaling replaces unhealthy application instances.
 - RDS uses Multi-AZ failover.
 - NAT Gateway is deployed per AZ in the high-availability design.
@@ -251,8 +246,8 @@ The final solution separates:
 1. DNS
 2. Edge delivery and protection
 3. Load balancing
-5. Replaceable application compute
-6. Managed database
-7. Monitoring and operations
+4. Replaceable application compute
+5. Managed database
+6. Monitoring and operations
 
 This provides a clear, scalable architecture aligned with the selected SAA project scope.
