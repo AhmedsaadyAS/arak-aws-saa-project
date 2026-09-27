@@ -198,17 +198,25 @@ SNS is used for important alarm notifications.
 │       ├── README.md
 │       └── aws.jfif
 ├── AWS/
+│   ├── edge/
+│   │   └── README.md
+│   ├── frontend/
+│   │   └── README.md
 │   ├── networking/
 │   │   ├── README.md
 │   │   └── vpc-design.md
+│   ├── load-balancing/
+│   │   └── README.md
 │   ├── compute/
 │   │   ├── README.md
 │   │   └── user-data.sh
 │   ├── database/
 │   │   └── README.md
 │   ├── security/
+│   │   ├── README.md
+│   ├── monitoring/
 │   │   └── README.md
-│   └── monitoring/
+│   └── cost/
 │       └── README.md
 ├── DOCUMENTATION/
 │   └── architecture-decisions.md
