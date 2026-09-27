@@ -27,6 +27,11 @@ The architecture uses:
 - IAM roles, AWS Secrets Manager, and Systems Manager
 - Amazon CloudWatch and Amazon SNS for monitoring and alerting
 
+### Supporting Architecture Diagrams
+
+- [VPC / Network Architecture](ARCHITECTURE/diagrams/network-architecture.svg) — subnet layout, CIDRs, AZ distribution, ALB, EC2, NAT, and RDS.
+- [Security & Traffic Flow](ARCHITECTURE/diagrams/security-traffic-flow.svg) — request path, security-group boundaries, identity/secrets, network defense, and monitoring controls.
+
 ## Request Flow
 
 ```text
@@ -185,7 +190,8 @@ The practical implementation is documented separately so the repository clearly 
 │   └── diagrams/
 │       ├── README.md
 │       ├── aws.svg
-│       └── aws.svg
+│       ├── network-architecture.svg
+│       └── security-traffic-flow.svg
 ├── AWS/
 │   ├── edge/
 │   │   └── README.md
