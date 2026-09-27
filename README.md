@@ -29,8 +29,17 @@ The architecture uses:
 
 ### Supporting Architecture Diagrams
 
-- [VPC / Network Architecture](ARCHITECTURE/diagrams/network-architecture.svg) — subnet layout, CIDRs, AZ distribution, ALB, EC2, NAT, and RDS.
-- [Security & Traffic Flow](ARCHITECTURE/diagrams/security-traffic-flow.svg) — request path, security-group boundaries, identity/secrets, network defense, and monitoring controls.
+#### VPC / Network Architecture
+
+![ARAK VPC Network Architecture](ARCHITECTURE/diagrams/network-architecture.svg)
+
+Shows the VPC CIDR, two Availability Zones, public/private subnet layout, exact CIDRs, ALB, NAT Gateways, EC2 Auto Scaling, and RDS database tier.
+
+#### Security & Traffic Flow
+
+![ARAK Security and Traffic Flow](ARCHITECTURE/diagrams/security-traffic-flow.svg)
+
+Shows the request path, security-group boundaries, private application/database tiers, IAM, Secrets Manager, Systems Manager, NACLs, CloudWatch, and SNS.
 
 ## Request Flow
 
