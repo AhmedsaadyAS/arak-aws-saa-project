@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="900" viewBox="0 0 1500 900">
+  <defs>
+    <style>
+      .title{font:700 30px Arial;fill:#172033}.sub{font:400 16px Arial;fill:#526071}
+      .zone{fill:#f8fafc;stroke:#c5ced9;stroke-width:2}.edge{fill:#eef6ff;stroke:#4d8fd8;stroke-width:2}
+      .app{fill:#f3f8f0;stroke:#6c9d62;stroke-width:2}.db{fill:#fff5e8;stroke:#d39a43;stroke-width:2}
+      .ops{fill:#f5f0fb;stroke:#8b72b5;stroke-width:2}.box{fill:white;stroke:#68778a;stroke-width:1.8}
+      .label{font:700 17px Arial;fill:#243044}.text{font:400 14px Arial;fill:#3f4c5d}.small{font:400 12px Arial;fill:#526071}
+      .flow{stroke:#4d657d;stroke-width:3;fill:none;marker-end:url(#arrow)}
+      .control{stroke:#8b72b5;stroke-width:2.5;fill:none;stroke-dasharray:7 6;marker-end:url(#arrow2)}
+      .guard{stroke:#a75d43;stroke-width:2.5;fill:none;stroke-dasharray:5 5;marker-end:url(#arrow3)}
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L10,3 L0,6 z" fill="#4d657d"/></marker>
+    <marker id="arrow2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L10,3 L0,6 z" fill="#8b72b5"/></marker>
+    <marker id="arrow3" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L10,3 L0,6 z" fill="#a75d43"/></marker>
+  </defs>
+  <text x="750" y="48" text-anchor="middle" class="title">ARAK — Security &amp; Traffic Flow</text>
+  <text x="750" y="76" text-anchor="middle" class="sub">Defense in depth • least privilege • private application and database tiers</text>
+
+  <rect x="45" y="110" width="1410" height="745" rx="18" class="zone"/>
+
+  <rect x="75" y="155" width="250" height="170" rx="14" class="edge"/>
+  <text x="200" y="185" text-anchor="middle" class="label">Public Edge</text>
+  <rect x="100" y="205" width="200" height="48" rx="8" class="box"/>
+  <text x="200" y="235" text-anchor="middle" class="label">Route 53</text>
+  <rect x="100" y="263" width="200" height="48" rx="8" class="box"/>
+  <text x="200" y="293" text-anchor="middle" class="label">CloudFront + WAF</text>
+
+  <rect x="385" y="155" width="300" height="170" rx="14" class="edge"/>
+  <text x="535" y="185" text-anchor="middle" class="label">Load Balancing Layer</text>
+  <rect x="420" y="215" width="230" height="75" rx="8" class="box"/>
+  <text x="535" y="245" text-anchor="middle" class="label">Application Load Balancer</text>
+  <text x="535" y="268" text-anchor="middle" class="small">HTTPS listener • target health checks</text>
+
+  <rect x="745" y="135" width="365" height="275" rx="14" class="app"/>
+  <text x="927" y="166" text-anchor="middle" class="label">Private Application Tier</text>
+  <rect x="780" y="195" width="295" height="90" rx="8" class="box"/>
+  <text x="927" y="225" text-anchor="middle" class="label">EC2 Auto Scaling Group</text>
+  <text x="927" y="247" text-anchor="middle" class="text">React/Vite + Nginx</text>
+  <text x="927" y="268" text-anchor="middle" class="text">ASP.NET Core API :5000</text>
+  <rect x="780" y="305" width="295" height="75" rx="8" class="box"/>
+  <text x="927" y="334" text-anchor="middle" class="label">arak-app-sg</text>
+  <text x="927" y="356" text-anchor="middle" class="small">inbound 5000 only from ALB SG</text>
+
+  <rect x="1170" y="135" width="235" height="275" rx="14" class="db"/>
+  <text x="1287" y="166" text-anchor="middle" class="label">Private DB Tier</text>
+  <rect x="1195" y="205" width="185" height="75" rx="8" class="box"/>
+  <text x="1287" y="235" text-anchor="middle" class="label">RDS SQL Server</text>
+  <text x="1287" y="258" text-anchor="middle" class="small">TCP 1433 • private</text>
+  <rect x="1195" y="305" width="185" height="75" rx="8" class="box"/>
+  <text x="1287" y="334" text-anchor="middle" class="label">arak-db-sg</text>
+  <text x="1287" y="356" text-anchor="middle" class="small">inbound 1433 only from App SG</text>
+
+  <path d="M325 240 L420 250" class="flow"/>
+  <path d="M650 252 L780 240" class="flow"/>
+  <path d="M1075 240 L1195 240" class="flow"/>
+
+  <rect x="100" y="470" width="410" height="295" rx="14" class="ops"/>
+  <text x="305" y="503" text-anchor="middle" class="label">Identity &amp; Secrets</text>
+  <rect x="135" y="535" width="340" height="62" rx="8" class="box"/>
+  <text x="305" y="562" text-anchor="middle" class="label">IAM Role</text>
+  <text x="305" y="582" text-anchor="middle" class="small">temporary permissions for EC2</text>
+  <rect x="135" y="615" width="340" height="62" rx="8" class="box"/>
+  <text x="305" y="642" text-anchor="middle" class="label">AWS Secrets Manager</text>
+  <text x="305" y="662" text-anchor="middle" class="small">database credentials</text>
+  <rect x="135" y="695" width="340" height="45" rx="8" class="box"/>
+  <text x="305" y="723" text-anchor="middle" class="label">Systems Manager Session Manager</text>
+
+  <rect x="555" y="470" width="410" height="295" rx="14" class="ops"/>
+  <text x="760" y="503" text-anchor="middle" class="label">Network Defense</text>
+  <rect x="590" y="535" width="340" height="62" rx="8" class="box"/>
+  <text x="760" y="562" text-anchor="middle" class="label">Security Groups</text>
+  <text x="760" y="582" text-anchor="middle" class="small">stateful, resource-level access control</text>
+  <rect x="590" y="615" width="340" height="62" rx="8" class="box"/>
+  <text x="760" y="642" text-anchor="middle" class="label">Network ACLs</text>
+  <text x="760" y="662" text-anchor="middle" class="small">subnet-level defense in depth</text>
+  <rect x="590" y="695" width="340" height="45" rx="8" class="box"/>
+  <text x="760" y="723" text-anchor="middle" class="label">Private subnets + no public IPs</text>
+
+  <rect x="1010" y="470" width="395" height="295" rx="14" class="ops"/>
+  <text x="1207" y="503" text-anchor="middle" class="label">Monitoring &amp; Alerting</text>
+  <rect x="1045" y="535" width="325" height="62" rx="8" class="box"/>
+  <text x="1207" y="562" text-anchor="middle" class="label">CloudWatch</text>
+  <text x="1207" y="582" text-anchor="middle" class="small">metrics • alarms • dashboards</text>
+  <rect x="1045" y="615" width="325" height="62" rx="8" class="box"/>
+  <text x="1207" y="642" text-anchor="middle" class="label">SNS</text>
+  <text x="1207" y="662" text-anchor="middle" class="small">alarm notifications</text>
+  <rect x="1045" y="695" width="325" height="45" rx="8" class="box"/>
+  <text x="1207" y="723" text-anchor="middle" class="label">ALB / EC2 / RDS signals</text>
+
+  <path d="M305 535 C520 420 700 390 850 330" class="control"/>
+  <path d="M475 646 C680 430 790 395 900 375" class="control"/>
+  <path d="M760 535 C720 430 650 350 550 292" class="guard"/>
+  <path d="M760 597 C920 500 1110 430 1280 380" class="guard"/>
+  <path d="M1207 535 C1100 430 1030 390 975 375" class="control"/>
+  <path d="M1207 597 C1120 470 1080 430 1030 380" class="control"/>
+
+  <text x="750" y="825" text-anchor="middle" class="small">Traffic flow: Internet → Route 53 → CloudFront/WAF → ALB → EC2 → RDS</text>
+</svg>
