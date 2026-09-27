@@ -15,7 +15,7 @@ Amazon RDS provides the managed relational database layer for Arak.
 - Encryption at rest: Enabled
 - Automated backups: Enabled
 
-SQL Server Standard Edition is used in the architecture so the selected Multi-AZ design is compatible with supported RDS SQL Server high-availability configurations. AWS documents Multi-AZ support for SQL Server editions and versions including Standard Edition. citeturn0search4
+SQL Server Standard Edition is used in the architecture so the selected Multi-AZ design is compatible with supported RDS SQL Server high-availability configurations. AWS documents Multi-AZ support for SQL Server editions and versions including Standard Edition.
 
 ## Network Security
 
@@ -36,7 +36,7 @@ The application retrieves credentials at runtime through its EC2 IAM role rather
 
 ## Availability
 
-The RDS DB subnet group spans two Availability Zones and the database uses a Multi-AZ deployment for automatic failover. citeturn0search4turn0search15
+The RDS DB subnet group spans two Availability Zones and the database uses a Multi-AZ deployment for automatic failover.
 
 ## Backup and Recovery
 
