@@ -36,7 +36,7 @@ This document records the main architecture decisions for the Arak AWS Solutions
 
 **Decision:** Use Route 53, CloudFront, and AWS WAF as the public edge layer.
 
-**Reason:** CloudFront provides global delivery and caching, while WAF provides web-layer protection. CloudFront can use S3 and ALB origins, allowing static frontend content and dynamic API traffic to follow separate paths. citeturn1search11
+**Reason:** CloudFront provides global delivery and caching, while WAF provides web-layer protection. CloudFront can use S3 and ALB origins, allowing static frontend content and dynamic API traffic to follow separate paths.
 
 ## ADR-007 — Use S3 for the Static Frontend
 
@@ -60,19 +60,19 @@ This document records the main architecture decisions for the Arak AWS Solutions
 
 **Decision:** Use target tracking on average EC2 CPU utilization with a 50% target.
 
-**Reason:** Target tracking automatically adjusts capacity around the selected utilization target. citeturn0search1
+**Reason:** Target tracking automatically adjusts capacity around the selected utilization target.
 
 ## ADR-011 — Step Scaling for Exceptional Spikes
 
 **Decision:** Document step scaling as an advanced scale-out mechanism for unusually high utilization.
 
-**Reason:** Step scaling allows larger capacity adjustments at defined thresholds. It must be designed carefully alongside target tracking because conflicting policies can cause undesirable scaling behavior. citeturn0search0turn0search11
+**Reason:** Step scaling allows larger capacity adjustments at defined thresholds. It must be designed carefully alongside target tracking because conflicting policies can cause undesirable scaling behavior.
 
 ## ADR-012 — Multi-AZ RDS for SQL Server
 
 **Decision:** Use Amazon RDS for SQL Server with a Multi-AZ deployment.
 
-**Reason:** RDS provides managed database operations and automatic failover for supported SQL Server Multi-AZ configurations. SQL Server Standard Edition is selected for the architecture. citeturn0search4
+**Reason:** RDS provides managed database operations and automatic failover for supported SQL Server Multi-AZ configurations. SQL Server Standard Edition is selected for the architecture.
 
 ## ADR-013 — Secrets Manager for Database Credentials
 
