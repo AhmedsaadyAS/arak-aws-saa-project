@@ -1,84 +1,66 @@
-# ARAK AWS Architecture Diagrams
+# ARAK AWS Architecture Diagram
 
-This directory contains the final visual representation of the validated ARAK AWS Solution Architecture.
+This directory contains the visual architecture diagram for the project.
 
-## Final Architecture Diagram
+## Diagram
 
 ![ARAK AWS Solution Architecture](./aws.jfif)
 
-The original project architecture image is used as the source-of-truth visual diagram. It presents the target architecture and implementation details relevant to the project, including the VPC, Availability Zones, subnet CIDRs, NAT Gateway, Application Load Balancer, Target Group, Auto Scaling Group, Dockerized ASP.NET Core application, private RDS for SQL Server, security and management services, and monitoring.
+The diagram represents the solution architecture described throughout the repository.
+
+## Main Layers
+
+1. Route 53
+2. CloudFront
+3. AWS WAF
+4. S3 static frontend
+5. Application Load Balancer
+6. EC2 Auto Scaling Group
+7. Amazon RDS for SQL Server
+8. NAT Gateway and VPC networking
+9. IAM, Secrets Manager, Systems Manager
+10. CloudWatch and SNS
 
 ## Network Layout
 
-### VPC
+### AZ-1
 
-- VPC: `arak-vpc`
-- CIDR: `10.0.0.0/16`
-- Region: `us-east-1`
+| Tier | CIDR |
+|---|---|
+| Public | `10.0.1.0/24` |
+| Private Application | `10.0.11.0/24` |
+| Private Database | `10.0.21.0/24` |
 
-### Availability Zone 1 — `us-east-1a`
+### AZ-2
 
-| Tier | Resource | CIDR |
-|---|---|---|
-| Public | `arak-public-1a` | `10.0.1.0/24` |
-| Private Application | `arak-private-app-1a` | `10.0.11.0/24` |
-| Private Database | `arak-private-db-1a` | `10.0.21.0/24` |
+| Tier | CIDR |
+|---|---|
+| Public | `10.0.2.0/24` |
+| Private Application | `10.0.12.0/24` |
+| Private Database | `10.0.22.0/24` |
 
-### Availability Zone 2 — `us-east-1b`
+## Request Paths
 
-| Tier | Resource | CIDR |
-|---|---|---|
-| Public | `arak-public-1b` | `10.0.2.0/24` |
-| Private Application | `arak-private-app-1b` | `10.0.12.0/24` |
-| Private Database | `arak-private-db-1b` | `10.0.22.0/24` |
+### Static frontend
 
-## Application Path
+```text
+User -> Route 53 -> CloudFront/WAF -> S3
+```
 
-The primary request path shown in the diagram is:
+### API
 
-`Users / Internet → Route 53 → CloudFront → AWS WAF → Application Load Balancer → Target Group → EC2 Auto Scaling Group → ASP.NET Core API → Amazon RDS for SQL Server`
+```text
+User / Frontend -> Route 53 -> CloudFront/WAF -> ALB
+             -> Target Group -> EC2 ASG -> ASP.NET Core -> RDS
+```
 
-## Application Layer
+CloudFront supports both S3 and Application Load Balancer origins. citeturn1search11
 
-- Auto Scaling Group: `arak-app-asg`
-- Minimum capacity: `1`
-- Desired capacity: `1`
-- Maximum capacity: `2`
-- Application: Dockerized ASP.NET Core API
-- Application port: `5000`
-- Health check: `GET /health`
-- Expected health response: HTTP `200`
+## Design Notes
 
-## Database Layer
-
-- Service: Amazon RDS for SQL Server
-- Identifier: `arak-db-2`
-- Instance class: `db.t3.micro`
-- Port: `1433`
-- Access: Private
-- Deployment: Multi-AZ
-- Database subnet group spans both private database subnets
-
-## Security, Management, and Monitoring
-
-### Security & Management
-
-- AWS IAM
-- `ARAK-Production-EC2-Role`
-- AWS Systems Manager Session Manager
-- AWS Secrets Manager
-
-### Monitoring
-
-- Amazon CloudWatch
-- Amazon SNS
-
-## Supporting Networking
-
-- Internet Gateway for public subnet connectivity
-- `arak-nat-a` NAT Gateway for private application subnet outbound access
-- Private database subnets do not require a direct Internet default route
-
-## Source of Truth
-
-The `aws.jfif` image in this directory is the original project architecture diagram and is the visual source of truth. The accompanying documentation explains the architecture elements and implementation details.
+- ALB spans both public subnets.
+- EC2 instances are private.
+- RDS is private and Multi-AZ.
+- Application traffic uses port `5000`.
+- SQL Server traffic uses port `1433`.
+- CloudWatch and SNS provide observability and alerting.
