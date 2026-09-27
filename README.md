@@ -19,8 +19,7 @@ The architecture uses:
 - Amazon Route 53 for DNS
 - Amazon CloudFront for global delivery and static-content caching
 - AWS WAF for web-layer protection
-- Amazon S3 for the React/Vite static frontend
-- Internet-facing Application Load Balancer for API traffic
+- - Internet-facing Application Load Balancer for API traffic
 - Amazon EC2 Auto Scaling across two Availability Zones
 - Dockerized ASP.NET Core API
 - Amazon RDS for SQL Server in private database subnets
@@ -30,7 +29,7 @@ The architecture uses:
 
 ## Request Flow
 
-### Frontend
+### Request Flow
 
 ```text
 User
@@ -42,37 +41,20 @@ Route 53
 CloudFront + WAF
   |
   v
-S3
+Application Load Balancer
   |
   v
-React/Vite Frontend
-```
-
-### API
-
-```text
-User / Frontend
-      |
-      v
-Route 53
-      |
-      v
-CloudFront + WAF
-      |
-      v
-Application Load Balancer
-      |
-      v
 Target Group
-      |
-      v
+  |
+  v
 EC2 Auto Scaling Group
-      |
-      v
-ASP.NET Core API
-      |
-      v
-Amazon RDS for SQL Server
+  |
+  +--> React/Vite + Nginx
+  |
+  +--> ASP.NET Core API
+             |
+             v
+       Amazon RDS for SQL Server
 ```
 
 CloudFront can use multiple origins, including Amazon S3 and an Application Load Balancer, which allows the frontend and API paths to share the same public entry point.
