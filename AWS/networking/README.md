@@ -1,27 +1,42 @@
 # Networking
 
-## Manual Architecture
+The networking design provides the foundation for the Arak AWS solution.
 
-The network foundation was manually implemented and validated in `us-east-1`.
+## VPC
 
-- VPC: `arak-vpc`, CIDR `10.0.0.0/16`
-- Availability Zones: `us-east-1a`, `us-east-1b`
-- Public subnets: `arak-public-a`, `arak-public-b`
-- Private application subnets: `arak-app-a`, `arak-app-b`
-- Private database subnets: `arak-db-a`, `arak-db-b`
-- Internet Gateway: `arak-igw`
-- Public route table: `arak-public-rt`
-- Private application route table: `arak-private-app-rt`
-- Private database route table: `arak-private-db-rt`
+- CIDR: `10.0.0.0/16`
+- Two Availability Zones
+- Public, private application, and private database tiers
 
-## NAT Gateway Implementation
+## Subnets
 
-The production-oriented design prefers one NAT Gateway per Availability Zone.
+| Tier | AZ-1 | AZ-2 |
+|---|---|---|
+| Public | `10.0.1.0/24` | `10.0.2.0/24` |
+| Application | `10.0.11.0/24` | `10.0.12.0/24` |
+| Database | `10.0.21.0/24` | `10.0.22.0/24` |
 
-For the current lab implementation, a single NAT Gateway named `arak-nat-a` was deployed in Public-A. Both private application subnets use the private application route table that routes outbound traffic through this NAT Gateway.
+## Routing
 
-This is a cost-optimized lab configuration and introduces a potential cross-AZ dependency for private-subnet egress.
+Public subnets:
 
-## CloudFormation Validation
+```text
+0.0.0.0/0 -> Internet Gateway
+```
 
-The `cloudformation/network.yaml` template was deployed as stack `arak-network-test` in `us-east-1` and reached `CREATE_COMPLETE`. The stack created the VPC, six subnets, gateways, route tables, routes, and subnet associations.
+Private application subnets:
+
+```text
+AZ-1 -> NAT Gateway in AZ-1
+AZ-2 -> NAT Gateway in AZ-2
+```
+
+Private database subnets have no Internet default route.
+
+## Design Principles
+
+- ALB is public.
+- EC2 is private.
+- RDS is private.
+- NAT provides controlled application egress.
+- Two Availability Zones provide workload redundancy.
