@@ -2,26 +2,47 @@
 
 ## Amazon RDS for SQL Server
 
-The Arak application uses Amazon RDS for SQL Server as the managed database layer.
+Amazon RDS provides the managed relational database layer for Arak.
 
-### Configuration
+### Design Configuration
 
-- Identifier: `arak-db-2`
-- Engine: SQL Server Express Edition
-- Instance class: `db.t3.micro`
+- Engine: Microsoft SQL Server
+- Edition: Standard Edition
 - Port: `1433`
 - Public accessibility: Disabled
-- DB subnet group: `arak-db-subnet-group`
-- Subnets: `arak-db-a`, `arak-db-b`
+- DB subnet group: private DB subnets in two Availability Zones
+- Multi-AZ: Enabled
+- Encryption at rest: Enabled
+- Automated backups: Enabled
 
-## Security
+SQL Server Standard Edition is used in the architecture so the selected Multi-AZ design is compatible with supported RDS SQL Server high-availability configurations. AWS documents Multi-AZ support for SQL Server editions and versions including Standard Edition. citeturn0search4
 
-Database access is controlled through `arak-db-sg`. TCP `1433` is allowed only from `arak-app-sg`. The database does not allow public inbound access.
+## Network Security
+
+The database Security Group allows:
+
+```text
+TCP 1433
+Source: Application Security Group
+```
+
+No public inbound database rule is used.
 
 ## Credentials
 
-Database credentials are stored in AWS Secrets Manager. The EC2 instance retrieves them at runtime using its IAM instance role instead of storing them in the application image or repository.
+Database credentials are stored in AWS Secrets Manager.
 
-## Validation
+The application retrieves credentials at runtime through its EC2 IAM role rather than storing passwords in the container image or repository.
 
-EC2-to-RDS connectivity and backend-to-RDS connectivity through Entity Framework Core were validated successfully.
+## Availability
+
+The RDS DB subnet group spans two Availability Zones and the database uses a Multi-AZ deployment for automatic failover. citeturn0search4turn0search15
+
+## Backup and Recovery
+
+The design includes:
+
+- Automated backups
+- Point-in-time recovery
+- Manual snapshots before major changes
+- CloudWatch monitoring for database health
