@@ -42,7 +42,7 @@ This document records the main architecture decisions for the Arak AWS Solutions
 
 **Decision:** Provide an AZ-local NAT Gateway for private application egress.
 
-**Reason:** This avoids making private-subnet Internet egress dependent on a single Availability Zone.
+**Reason:** This keeps private-subnet Internet egress independent across the two Availability Zones.
 
 ## ADR-008 — Security Groups as the Primary Firewall
 
@@ -54,19 +54,19 @@ This document records the main architecture decisions for the Arak AWS Solutions
 
 **Decision:** Use target tracking on average EC2 CPU utilization with a 50% target.
 
-**Reason:** Target tracking automatically adjusts capacity around the selected utilization target.
+**Reason:** Target tracking automatically adjusts Auto Scaling capacity around the selected utilization target.
 
 ## ADR-010 — Step Scaling for Exceptional Spikes
 
 **Decision:** Document step scaling as an advanced scale-out mechanism for unusually high utilization.
 
-**Reason:** Step scaling allows larger capacity adjustments at defined thresholds. It must be designed carefully alongside target tracking because conflicting policies can cause undesirable scaling behavior.
+**Reason:** Step scaling allows larger capacity adjustments at defined thresholds. It is designed with separated responsibilities alongside target tracking to avoid conflicting scaling behavior.
 
 ## ADR-011 — Multi-AZ RDS for SQL Server
 
 **Decision:** Use Amazon RDS for SQL Server with a Multi-AZ deployment.
 
-**Reason:** RDS provides managed database operations and automatic failover for supported SQL Server Multi-AZ configurations. SQL Server Standard Edition is selected for the architecture.
+**Reason:** RDS provides managed database operations and automatic failover for supported SQL Server Multi-AZ configurations. SQL Server Standard Edition is selected for the solution architecture.
 
 ## ADR-012 — Secrets Manager for Database Credentials
 
@@ -88,4 +88,4 @@ This document records the main architecture decisions for the Arak AWS Solutions
 
 ## Design Principle
 
-The repository is architecture-first. The required deliverable is the documented AWS solution and its architecture diagram; deployment execution is outside the required project scope.
+The repository separates the complete solution architecture from the concrete practical implementation and evidence. This keeps target-design decisions clear while preserving the actual AWS work performed during validation.
