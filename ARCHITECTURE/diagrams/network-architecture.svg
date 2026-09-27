@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="900" viewBox="0 0 1500 900">
+  <defs>
+    <style>
+      .title{font:700 30px Arial;fill:#172033}.sub{font:400 16px Arial;fill:#526071}
+      .az{fill:#f7f9fc;stroke:#b9c3d0;stroke-width:2}.public{fill:#eef6ff;stroke:#4d8fd8;stroke-width:2}
+      .app{fill:#f3f8f0;stroke:#6c9d62;stroke-width:2}.db{fill:#fff5e8;stroke:#d39a43;stroke-width:2}
+      .box{fill:white;stroke:#68778a;stroke-width:1.8}.label{font:700 17px Arial;fill:#243044}
+      .text{font:400 14px Arial;fill:#3f4c5d}.small{font:400 12px Arial;fill:#526071}
+      .flow{stroke:#4d657d;stroke-width:3;fill:none;marker-end:url(#arrow)}
+      .route{stroke:#9a6b22;stroke-width:2.5;fill:none;stroke-dasharray:8 6;marker-end:url(#arrow2)}
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L10,3 L0,6 z" fill="#4d657d"/></marker>
+    <marker id="arrow2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L10,3 L0,6 z" fill="#9a6b22"/></marker>
+  </defs>
+  <text x="750" y="48" text-anchor="middle" class="title">ARAK — VPC / Network Architecture</text>
+  <text x="750" y="76" text-anchor="middle" class="sub">Target solution design • us-east-1 • VPC 10.0.0.0/16 • two Availability Zones</text>
+
+  <rect x="35" y="105" width="1430" height="755" rx="18" class="az"/>
+  <text x="65" y="140" class="label">Amazon VPC — arak-vpc (10.0.0.0/16)</text>
+
+  <rect x="65" y="170" width="650" height="650" rx="16" class="az"/>
+  <text x="90" y="205" class="label">Availability Zone 1 — us-east-1a</text>
+
+  <rect x="90" y="230" width="600" height="145" rx="12" class="public"/>
+  <text x="112" y="258" class="label">Public Subnet — 10.0.1.0/24</text>
+  <rect x="120" y="285" width="250" height="65" rx="9" class="box"/>
+  <text x="245" y="313" text-anchor="middle" class="label">ALB Node</text>
+  <text x="245" y="334" text-anchor="middle" class="small">public-facing listener</text>
+  <rect x="405" y="285" width="240" height="65" rx="9" class="box"/>
+  <text x="525" y="313" text-anchor="middle" class="label">NAT Gateway A</text>
+  <text x="525" y="334" text-anchor="middle" class="small">private-subnet egress</text>
+
+  <rect x="90" y="400" width="600" height="180" rx="12" class="app"/>
+  <text x="112" y="428" class="label">Private Application Subnet — 10.0.11.0/24</text>
+  <rect x="120" y="450" width="250" height="95" rx="9" class="box"/>
+  <text x="245" y="480" text-anchor="middle" class="label">EC2 / ASG</text>
+  <text x="245" y="503" text-anchor="middle" class="text">React/Vite + Nginx</text>
+  <text x="245" y="523" text-anchor="middle" class="text">ASP.NET Core :5000</text>
+  <rect x="405" y="450" width="240" height="95" rx="9" class="box"/>
+  <text x="525" y="480" text-anchor="middle" class="label">Route Table</text>
+  <text x="525" y="503" text-anchor="middle" class="text">default → NAT A</text>
+  <text x="525" y="523" text-anchor="middle" class="small">application egress</text>
+
+  <rect x="90" y="605" width="600" height="180" rx="12" class="db"/>
+  <text x="112" y="633" class="label">Private Database Subnet — 10.0.21.0/24</text>
+  <rect x="120" y="655" width="525" height="95" rx="9" class="box"/>
+  <text x="382" y="685" text-anchor="middle" class="label">RDS for SQL Server</text>
+  <text x="382" y="708" text-anchor="middle" class="text">Multi-AZ database deployment</text>
+  <text x="382" y="729" text-anchor="middle" class="small">TCP 1433 • no direct Internet route</text>
+
+  <rect x="785" y="170" width="650" height="650" rx="16" class="az"/>
+  <text x="810" y="205" class="label">Availability Zone 2 — us-east-1b</text>
+
+  <rect x="810" y="230" width="600" height="145" rx="12" class="public"/>
+  <text x="832" y="258" class="label">Public Subnet — 10.0.2.0/24</text>
+  <rect x="840" y="285" width="250" height="65" rx="9" class="box"/>
+  <text x="965" y="313" text-anchor="middle" class="label">ALB Node</text>
+  <text x="965" y="334" text-anchor="middle" class="small">same ALB, second AZ</text>
+  <rect x="1125" y="285" width="240" height="65" rx="9" class="box"/>
+  <text x="1245" y="313" text-anchor="middle" class="label">NAT Gateway B</text>
+  <text x="1245" y="334" text-anchor="middle" class="small">private-subnet egress</text>
+
+  <rect x="810" y="400" width="600" height="180" rx="12" class="app"/>
+  <text x="832" y="428" class="label">Private Application Subnet — 10.0.12.0/24</text>
+  <rect x="840" y="450" width="250" height="95" rx="9" class="box"/>
+  <text x="965" y="480" text-anchor="middle" class="label">EC2 / ASG</text>
+  <text x="965" y="503" text-anchor="middle" class="text">React/Vite + Nginx</text>
+  <text x="965" y="523" text-anchor="middle" class="text">ASP.NET Core :5000</text>
+  <rect x="1125" y="450" width="240" height="95" rx="9" class="box"/>
+  <text x="1245" y="480" text-anchor="middle" class="label">Route Table</text>
+  <text x="1245" y="503" text-anchor="middle" class="text">default → NAT B</text>
+  <text x="1245" y="523" text-anchor="middle" class="small">application egress</text>
+
+  <rect x="810" y="605" width="600" height="180" rx="12" class="db"/>
+  <text x="832" y="633" class="label">Private Database Subnet — 10.0.22.0/24</text>
+  <rect x="840" y="655" width="525" height="95" rx="9" class="box"/>
+  <text x="1102" y="685" text-anchor="middle" class="label">RDS DB Subnet Group</text>
+  <text x="1102" y="708" text-anchor="middle" class="text">spans both database subnets</text>
+  <text x="1102" y="729" text-anchor="middle" class="small">SQL Server Multi-AZ placement</text>
+
+  <path d="M370 318 C560 318 760 318 840 318" class="flow"/>
+  <path d="M245 545 C245 600 382 620 382 655" class="flow"/>
+  <path d="M965 545 C965 600 1102 620 1102 655" class="flow"/>
+  <path d="M525 350 L525 450" class="route"/>
+  <path d="M1245 350 L1245 450" class="route"/>
+
+  <text x="750" y="845" text-anchor="middle" class="small">Public: ALB + NAT • Private: EC2 application tier • Private: RDS database tier • NAT is the controlled egress path</text>
+</svg>
