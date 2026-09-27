@@ -1,6 +1,6 @@
 # ARAK AWS Architecture Diagrams
 
-This directory contains the main visual solution architecture diagram and the supporting diagrams for the project.
+This directory contains the main visual solution architecture diagram and the two supporting diagrams used to explain the target design.
 
 ## Main Solution Architecture
 
@@ -11,6 +11,36 @@ The main diagram represents the complete target solution architecture: public ed
 The editable vector version is available as [aws.svg](./aws.svg).
 
 The earlier visual version is also preserved in Git history: [view the original diagram](https://github.com/AhmedsaadyAS/arak-aws-saa-project/blob/8ae1ad017ba71700535d7df86e661373336e2aa8/ARCHITECTURE/diagrams/aws.jfif).
+
+## Supporting Diagrams
+
+### 1. VPC / Network Architecture
+
+[Open network-architecture.svg](./network-architecture.svg)
+
+Shows:
+
+- VPC CIDR and Availability Zones
+- Public, private application, and private database subnets
+- Exact target-design CIDRs
+- ALB and NAT Gateway placement
+- EC2 Auto Scaling application tier
+- RDS SQL Server database tier
+- Private-subnet routing and controlled egress
+
+### 2. Security & Traffic Flow
+
+[Open security-traffic-flow.svg](./security-traffic-flow.svg)
+
+Shows:
+
+- Route 53 → CloudFront/WAF → ALB → EC2 → RDS traffic path
+- Security-group relationships
+- Private application and database boundaries
+- IAM and Secrets Manager
+- Systems Manager Session Manager
+- NACLs and private-subnet controls
+- CloudWatch and SNS monitoring/alerting
 
 ## Verified Architecture Values
 
