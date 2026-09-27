@@ -4,7 +4,7 @@ This directory contains the main visual solution architecture diagram and the su
 
 ## Main Solution Architecture
 
-![ARAK AWS Solution Architecture](./aws.png)
+![ARAK AWS Solution Architecture](./aws.svg)
 
 The main diagram represents the complete target solution architecture: public edge, VPC segmentation, two Availability Zones, ALB, EC2 Auto Scaling, RDS Multi-AZ, NAT gateways, security/management services, and monitoring.
 
