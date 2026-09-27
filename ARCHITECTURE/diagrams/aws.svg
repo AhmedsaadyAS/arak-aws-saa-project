@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1200" viewBox="0 0 1600 1200">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L10,3 L0,6 z" fill="#2b6cb0"/></marker>
+    <marker id="arrowGray" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L10,3 L0,6 z" fill="#667085"/></marker>
+    <style>
+      .title{font:700 34px Arial,sans-serif;fill:#172b4d}.subtitle{font:600 20px Arial,sans-serif;fill:#475467}.section{font:700 22px Arial,sans-serif;fill:#17365d}.label{font:700 18px Arial,sans-serif;fill:#172b4d}.small{font:16px Arial,sans-serif;fill:#344054}.tiny{font:14px Arial,sans-serif;fill:#475467}
+      .edge{fill:#f4f7fb;stroke:#9fb3c8;stroke-width:2}.service{fill:#fff;stroke:#4778a8;stroke-width:2}.vpc{fill:#f8fbff;stroke:#315b7d;stroke-width:3}.az{fill:#fff;stroke:#7b9bb7;stroke-width:2;stroke-dasharray:10 7}.public{fill:#eef7ea;stroke:#77a86d;stroke-width:2}.private{fill:#eef5fb;stroke:#6d9cc7;stroke-width:2}.db{fill:#f3effb;stroke:#8b78b6;stroke-width:2}.security{fill:#fff7e8;stroke:#d49b43;stroke-width:2}.monitor{fill:#f5f3fb;stroke:#8a78b5;stroke-width:2}
+      .primary{stroke:#2b6cb0;stroke-width:5;fill:none;marker-end:url(#arrow)}.secondary{stroke:#667085;stroke-width:2.5;fill:none;marker-end:url(#arrowGray)}.dashed{stroke:#667085;stroke-width:2.5;fill:none;stroke-dasharray:8 6;marker-end:url(#arrowGray)}
+    </style>
+  </defs>
+  <rect width="1600" height="1200" fill="#fff"/>
+  <rect x="35" y="25" width="1530" height="80" rx="18" fill="#eaf2f9" stroke="#9fb3c8" stroke-width="2"/>
+  <text x="70" y="62" class="title">ARAK — Scalable Web Application on AWS</text><text x="70" y="91" class="subtitle">Solution Architecture • Manara Project 1 • EC2 + ALB + Auto Scaling</text>
+  <rect x="45" y="135" width="1510" height="145" rx="18" class="edge"/><text x="70" y="165" class="section">Public Edge</text>
+  <rect x="85" y="185" width="210" height="65" rx="12" class="service"/><text x="190" y="213" text-anchor="middle" class="label">Users / Internet</text><text x="190" y="237" text-anchor="middle" class="small">HTTPS</text>
+  <rect x="350" y="185" width="220" height="65" rx="12" class="service"/><text x="460" y="213" text-anchor="middle" class="label">Amazon Route 53</text><text x="460" y="237" text-anchor="middle" class="small">DNS / Alias</text>
+  <rect x="625" y="185" width="235" height="65" rx="12" class="service"/><text x="742" y="213" text-anchor="middle" class="label">Amazon CloudFront</text><text x="742" y="237" text-anchor="middle" class="small">CDN / Caching</text>
+  <rect x="915" y="185" width="190" height="65" rx="12" class="service"/><text x="1010" y="213" text-anchor="middle" class="label">AWS WAF</text><text x="1010" y="237" text-anchor="middle" class="small">Web Protection</text>
+  <rect x="1160" y="185" width="280" height="65" rx="12" class="service"/><text x="1300" y="213" text-anchor="middle" class="label">Application Load Balancer</text><text x="1300" y="237" text-anchor="middle" class="small">HTTPS 443 → Target :5000</text>
+  <path d="M295 217 H350" class="primary"/><path d="M570 217 H625" class="primary"/><path d="M860 217 H915" class="primary"/><path d="M1105 217 H1160" class="primary"/>
+  <rect x="45" y="305" width="1510" height="655" rx="22" class="vpc"/><text x="70" y="340" class="section">AWS Region: us-east-1</text><text x="70" y="370" class="label">VPC: arak-vpc • 10.0.0.0/16</text>
+  <rect x="75" y="400" width="710" height="520" rx="18" class="az"/><text x="100" y="435" class="section">Availability Zone 1 — us-east-1a</text>
+  <rect x="100" y="455" width="660" height="95" rx="14" class="public"/><text x="125" y="485" class="label">Public-A • 10.0.1.0/24</text><text x="125" y="512" class="small">ALB nodes • NAT Gateway A</text>
+  <rect x="570" y="473" width="165" height="58" rx="10" class="service"/><text x="652" y="499" text-anchor="middle" class="label">NAT-A</text><text x="652" y="520" text-anchor="middle" class="tiny">private egress</text>
+  <rect x="100" y="575" width="660" height="120" rx="14" class="private"/><text x="125" y="605" class="label">App-A • 10.0.11.0/24</text><text x="125" y="631" class="small">Private EC2 • Auto Scaling • Docker</text><text x="125" y="656" class="small">React/Vite + Nginx • ASP.NET Core API :5000</text><text x="125" y="681" class="tiny">ASG: arak-app-asg • Min 2 • Desired 2 • Max 6</text>
+  <rect x="100" y="720" width="660" height="160" rx="14" class="db"/><text x="125" y="750" class="label">DB-A • 10.0.21.0/24</text><text x="125" y="778" class="small">Private RDS subnet</text><text x="125" y="806" class="label">Amazon RDS for SQL Server</text><text x="125" y="832" class="small">Standard Edition • TCP 1433 • Multi-AZ</text><text x="125" y="857" class="tiny">DB subnet group: arak-db-subnet-group</text>
+  <rect x="815" y="400" width="710" height="520" rx="18" class="az"/><text x="840" y="435" class="section">Availability Zone 2 — us-east-1b</text>
+  <rect x="840" y="455" width="660" height="95" rx="14" class="public"/><text x="865" y="485" class="label">Public-B • 10.0.2.0/24</text><text x="865" y="512" class="small">ALB nodes • NAT Gateway B</text>
+  <rect x="1310" y="473" width="165" height="58" rx="10" class="service"/><text x="1392" y="499" text-anchor="middle" class="label">NAT-B</text><text x="1392" y="520" text-anchor="middle" class="tiny">private egress</text>
+  <rect x="840" y="575" width="660" height="120" rx="14" class="private"/><text x="865" y="605" class="label">App-B • 10.0.12.0/24</text><text x="865" y="631" class="small">Private EC2 • Auto Scaling • Docker</text><text x="865" y="656" class="small">React/Vite + Nginx • ASP.NET Core API :5000</text><text x="865" y="681" class="tiny">ASG: arak-app-asg • Min 2 • Desired 2 • Max 6</text>
+  <rect x="840" y="720" width="660" height="160" rx="14" class="db"/><text x="865" y="750" class="label">DB-B • 10.0.22.0/24</text><text x="865" y="778" class="small">Private RDS subnet</text><text x="865" y="806" class="label">RDS standby / Multi-AZ placement</text><text x="865" y="832" class="small">SQL Server • TCP 1433 • Private</text><text x="865" y="857" class="tiny">Same logical RDS deployment</text>
+  <path d="M1300 250 V390 H1120 V575" class="primary"/><text x="1150" y="385" class="small">Forwarded application traffic</text>
+  <path d="M760 635 H840" class="secondary"/><text x="755" y="615" text-anchor="end" class="tiny">ASG distributes across AZs</text>
+  <path d="M430 695 V720" class="secondary"/><path d="M1170 695 V720" class="secondary"/><text x="800" y="708" text-anchor="middle" class="tiny">TCP 1433 • App SG → DB SG</text>
+  <path d="M430 575 V550" class="dashed"/><path d="M1170 575 V550" class="dashed"/>
+  <rect x="45" y="990" width="1510" height="175" rx="18" class="edge"/><text x="70" y="1022" class="section">Security, Management &amp; Monitoring</text>
+  <rect x="85" y="1045" width="320" height="90" rx="12" class="security"/><text x="245" y="1073" text-anchor="middle" class="label">IAM + Secrets Manager</text><text x="245" y="1098" text-anchor="middle" class="small">EC2 role • runtime credentials</text><text x="245" y="1120" text-anchor="middle" class="tiny">No long-lived keys on instances</text>
+  <rect x="455" y="1045" width="300" height="90" rx="12" class="security"/><text x="605" y="1073" text-anchor="middle" class="label">Systems Manager</text><text x="605" y="1098" text-anchor="middle" class="small">Session Manager</text><text x="605" y="1120" text-anchor="middle" class="tiny">Private administration</text>
+  <rect x="805" y="1045" width="300" height="90" rx="12" class="monitor"/><text x="955" y="1073" text-anchor="middle" class="label">Amazon CloudWatch</text><text x="955" y="1098" text-anchor="middle" class="small">Metrics • Alarms • Dashboards</text><text x="955" y="1120" text-anchor="middle" class="tiny">ALB • EC2/ASG • RDS</text>
+  <rect x="1155" y="1045" width="320" height="90" rx="12" class="monitor"/><text x="1315" y="1073" text-anchor="middle" class="label">Amazon SNS</text><text x="1315" y="1098" text-anchor="middle" class="small">Alarm notifications</text><text x="1315" y="1120" text-anchor="middle" class="tiny">CloudWatch → SNS</text>
+  <path d="M1105 1090 H1155" class="primary"/>
+  <text x="800" y="1188" text-anchor="middle" class="tiny">ARAK AWS Solution Architecture — exact CIDRs and target-design scaling values from repository documentation</text>
+</svg>
