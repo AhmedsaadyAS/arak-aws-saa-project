@@ -213,7 +213,7 @@ SNS is used for important alarm notifications.
 │   ├── database/
 │   │   └── README.md
 │   ├── security/
-│   │   ├── README.md
+│   │   └── README.md
 │   ├── monitoring/
 │   │   └── README.md
 │   └── cost/
