@@ -36,7 +36,7 @@ This document records the main architecture decisions for the Arak AWS Solutions
 
 **Decision:** Use Route 53, CloudFront, and AWS WAF as the public edge layer.
 
-**Reason:** CloudFront provides global delivery and caching, while WAF provides web-layer protection. CloudFront can use S3 and ALB origins, allowing static frontend content and dynamic API traffic to follow separate paths.
+**Reason:** CloudFront provides global delivery and caching, while WAF provides web-layer protection. CloudFront sits in front of the Application Load Balancer, providing a common public edge and caching layer for the web application.
 
 ## ADR-007 — Use NAT Gateway Per Availability Zone
 
