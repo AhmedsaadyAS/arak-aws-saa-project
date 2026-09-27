@@ -75,7 +75,7 @@ ASP.NET Core API
 Amazon RDS for SQL Server
 ```
 
-CloudFront can use multiple origins, including Amazon S3 and an Application Load Balancer, which allows the frontend and API paths to share the same public entry point. citeturn1search11
+CloudFront can use multiple origins, including Amazon S3 and an Application Load Balancer, which allows the frontend and API paths to share the same public entry point.
 
 ## Network Design
 
@@ -142,13 +142,13 @@ Key controls:
 
 The primary scaling policy is **target tracking** using average EC2 CPU utilization with a target of 50%.
 
-A step-scaling policy is also documented as an advanced response mechanism for exceptional load conditions. It should be configured so that it does not conflict with the primary target-tracking policy. AWS notes that target tracking is sufficient for many workloads and recommends caution when combining it with step scaling because conflicting policies can cause undesirable behavior. citeturn0search1turn0search11
+A step-scaling policy is also documented as an advanced response mechanism for exceptional load conditions. It should be configured so that it does not conflict with the primary target-tracking policy. AWS notes that target tracking is sufficient for many workloads and recommends caution when combining it with step scaling because conflicting policies can cause undesirable behavior.
 
 ### Database Tier
 
 Amazon RDS for SQL Server is placed in private database subnets spanning two Availability Zones. The solution uses a SQL Server edition that supports the selected Multi-AZ configuration.
 
-RDS Multi-AZ provides a standby database in another Availability Zone and supports automatic failover while retaining the same database endpoint. citeturn0search4turn0search6
+RDS Multi-AZ provides a standby database in another Availability Zone and supports automatic failover while retaining the same database endpoint.
 
 ## Observability
 
