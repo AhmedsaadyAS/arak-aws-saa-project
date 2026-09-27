@@ -1,103 +1,259 @@
-# Target Architecture
+# ARAK Target Solution Architecture
 
 ## Objective
 
-Transform the existing Arak single-EC2 prototype into a scalable, highly available AWS architecture that matches the selected Manara Project 1 scope: **Scalable Web Application with ALB and Auto Scaling**.
+Design a scalable, highly available AWS architecture for the existing Arak education-management SaaS application.
 
-## Target Request Flow
+The architecture follows the selected Manara project:
 
-Internet users will access Arak through an edge and load-balancing layer before reaching application instances in private subnets.
+**Project 1 – Scalable Web Application with ALB and Auto Scaling**
 
-Validated flow:
+## Logical Architecture
 
-1. Route 53 (optional, when a domain is available)
-2. CloudFront + WAF (where justified)
-3. Application Load Balancer in public subnets
-4. EC2 Auto Scaling Group across two Availability Zones in private subnets
-5. Managed SQL Server database in private database subnets
+```text
+                         Internet Users
+                              |
+                              v
+                         Amazon Route 53
+                              |
+                              v
+                     CloudFront + AWS WAF
+                        /              \
+                       /                \
+                      v                  v
+              Amazon S3             Application
+           React/Vite Frontend      Load Balancer
+                                        |
+                                        v
+                                   Target Group
+                                        |
+                         +--------------+--------------+
+                         |                             |
+                         v                             v
+                    EC2 / AZ-1                    EC2 / AZ-2
+                         |                             |
+                         +--------------+--------------+
+                                        |
+                                        v
+                              ASP.NET Core API
+                                        |
+                                        v
+                              Amazon RDS SQL Server
+                             Multi-AZ private database
+```
 
-The core flow through the ALB, Target Group, private Auto Scaling instances, Docker backend, and private RDS SQL Server has been manually validated. Route 53, CloudFront, and WAF remain optional services for the final scope.
+CloudFront supports multiple origins, including S3 and Application Load Balancers, making it suitable for separating static frontend delivery from dynamic API traffic while keeping a common public entry point. citeturn1search11
 
-## Network Design
+## DNS and Edge Layer
 
-The final VPC will span two Availability Zones and separate public, private application, and private database subnets.
+### Route 53
 
-### Public Layer
+Route 53 provides the public DNS entry for the application.
 
-- ALB subnets in AZ1 and AZ2
-- Internet Gateway attached to the VPC
-- Public route table for internet-facing resources
+An alias record points the application domain to the CloudFront distribution. AWS documents Route 53 alias records as the standard way to route a domain to a CloudFront distribution. citeturn1search0
 
-### Private Application Layer
+### CloudFront
 
-- EC2 instances managed by the Auto Scaling Group
-- No direct inbound access from the internet
-- Outbound internet access controlled through NAT where required
+CloudFront provides:
 
-### Private Database Layer
+- Global edge delivery
+- Static asset caching
+- TLS termination
+- A common public entry point
+- Separate origins for frontend and API traffic
 
-- RDS for SQL Server
-- Database subnet group spanning AZ1 and AZ2
-- No public database access
+### AWS WAF
 
-## Application Layer
+WAF protects the public web layer with managed and application-specific rules.
 
-The application instances will run the Arak deployment package consistently through a Launch Template.
+Recommended rule categories:
 
-The initial implementation strategy is to preserve the existing application deployment model (Nginx + React production build + ASP.NET Core API) while making the compute layer replaceable and horizontally scalable.
+- AWS Managed Rules
+- Known bad input protection
+- Common web exploit protection
+- Rate-based protection for abusive request patterns
 
-## Database Layer
+## VPC Design
 
-The current local SQL Server instance on the prototype EC2 has been replaced for the validated architecture by Amazon RDS for SQL Server.
+**CIDR:** `10.0.0.0/16`
 
-The production application uses the RDS endpoint instead of a database process running on the EC2 host.
+The VPC spans two Availability Zones.
 
-## Availability and Scalability
+| Tier | AZ-1 | AZ-2 | Purpose |
+|---|---|---|---|
+| Public | `10.0.1.0/24` | `10.0.2.0/24` | ALB and NAT Gateway |
+| Private Application | `10.0.11.0/24` | `10.0.12.0/24` | EC2 Auto Scaling |
+| Private Database | `10.0.21.0/24` | `10.0.22.0/24` | RDS |
 
-- ALB distributes traffic across healthy application instances.
-- Auto Scaling Group maintains the desired instance capacity.
-- Instances are distributed across two Availability Zones.
-- Health checks allow unhealthy instances to be replaced.
-- RDS Multi-AZ provides database failover capability.
+### Public Subnets
 
-## Security Controls
+Contain:
 
-Validated controls include:
+- Application Load Balancer
+- NAT Gateway
 
-- Security Groups with least-necessary traffic paths
-- NACLs for subnet-level controls where useful
-- IAM roles instead of hardcoded AWS credentials
-- Systems Manager Session Manager for administrative access
-- Private application and database subnets
-- WAF where the final edge design uses CloudFront/ALB protection
+Public route:
+
+```text
+0.0.0.0/0 -> Internet Gateway
+```
+
+### Private Application Subnets
+
+Contain the EC2 Auto Scaling instances.
+
+Each Availability Zone uses an AZ-local NAT Gateway for outbound Internet access.
+
+### Private Database Subnets
+
+Contain the RDS subnet group.
+
+The database route tables contain the local VPC route only and do not provide direct Internet access.
+
+## Application Tier
+
+### EC2 Auto Scaling Group
+
+The application tier is designed as replaceable compute.
+
+- Launch Template
+- Amazon Linux 2023
+- Dockerized ASP.NET Core API
+- Port `5000`
+- Minimum capacity: 2
+- Desired capacity: 2
+- Maximum capacity: 6
+- Health check type: ELB
+
+The instances do not receive public IP addresses.
+
+### Application Load Balancer
+
+The ALB:
+
+- Is internet-facing
+- Runs across the two public subnets
+- Receives HTTP/HTTPS traffic from the edge layer
+- Routes API requests to the target group
+- Performs health checks on `/health`
+- Sends traffic only to healthy application targets
+
+## Auto Scaling Strategy
+
+### Primary Policy — Target Tracking
+
+Target tracking maintains average EC2 CPU utilization around **50%**.
+
+The Auto Scaling Group automatically adds capacity when demand increases and removes capacity when demand falls, within the configured minimum and maximum limits. citeturn0search1
+
+### Advanced Policy — Step Scaling
+
+Step scaling is reserved for exceptional load thresholds where a more aggressive response is desirable.
+
+Example design:
+
+| Alarm condition | Adjustment |
+|---|---:|
+| CPU > 70% | +1 instance |
+| CPU > 85% | +2 instances |
+
+Scale-in should remain controlled by the primary target-tracking policy or by a separately designed scale-in mechanism to avoid conflicting instructions. AWS recommends caution when combining target tracking and step scaling. citeturn0search0turn0search11
+
+## Database Tier
+
+Amazon RDS for SQL Server provides the managed relational database layer.
+
+Design:
+
+- Private DB subnet group
+- Two Availability Zones
+- SQL Server Standard Edition
+- Port `1433`
+- Public accessibility disabled
+- Encryption at rest
+- Automated backups
+- Multi-AZ deployment
+
+RDS Multi-AZ uses a synchronized standby in another Availability Zone and can automatically fail over while preserving the database endpoint. citeturn0search4turn0search15
+
+## Security Model
+
+Traffic boundaries:
+
+```text
+Internet
+   |
+   v
+CloudFront / WAF
+   |
+   v
+ALB
+   |
+   v
+Application EC2
+   |
+   v
+RDS SQL Server
+```
+
+Security Groups:
+
+- **ALB SG:** allow HTTP/HTTPS from the public edge.
+- **App SG:** allow TCP `5000` only from ALB SG.
+- **DB SG:** allow TCP `1433` only from App SG.
+
+Additional controls:
+
+- WAF at the web layer
+- Private application subnets
+- Private database subnets
+- NACL defense in depth
+- IAM roles
+- Secrets Manager
+- Systems Manager Session Manager
 
 ## Observability
 
-Planned operational services not yet completed:
+CloudWatch monitors:
 
-- CloudWatch metrics and logs
-- CloudWatch alarms
-- SNS notifications for important alarms
+- EC2 CPU utilization
+- Auto Scaling Group capacity
+- ALB request count
+- ALB HTTP 4xx/5xx
+- ALB unhealthy hosts
+- RDS CPU utilization
+- RDS database connections
+- RDS free storage
 
-## Important Design Rule
+SNS distributes important alarm notifications.
 
-The manual AWS architecture is complete and verified. The next implementation milestone is reproducing it with CloudFormation.
+## Availability Model
 
-## Implementation Status
+The solution removes major single-instance dependencies:
 
-### Manually validated
+- ALB spans two AZs.
+- Application instances span two AZs.
+- Auto Scaling replaces unhealthy application instances.
+- RDS uses Multi-AZ failover.
+- NAT Gateway is deployed per AZ in the high-availability design.
+- CloudFront distributes traffic through AWS edge locations.
 
-- Networking
-- Security Groups
-- RDS
-- EC2 Auto Scaling
-- Docker deployment
-- Application Load Balancer
-- Target Group
-- End-to-end health check
+## Operational Access
 
-### Infrastructure as Code
+Systems Manager Session Manager is used for administration instead of exposing SSH to the public Internet.
 
-CloudFormation implementation has started.
+The EC2 instance role provides the required AWS permissions without storing long-lived access keys on the instances.
 
-The networking template was successfully deployed as `arak-network-test` in `us-east-1` with status `CREATE_COMPLETE`.
+## Design Outcome
+
+The final solution separates:
+
+1. DNS
+2. Edge delivery and protection
+3. Static frontend delivery
+4. Load balancing
+5. Replaceable application compute
+6. Managed database
+7. Monitoring and operations
+
+This provides a clear, scalable architecture aligned with the selected SAA project scope.
