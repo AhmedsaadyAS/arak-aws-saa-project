@@ -1,46 +1,32 @@
-# ARAK AWS Architecture Diagram
+# ARAK AWS Architecture Diagrams
 
-This directory contains the visual architecture diagram for the project.
+This directory contains the main visual solution architecture diagram and the supporting diagrams for the project.
 
-## Diagram
+## Main Solution Architecture
 
-![ARAK AWS Solution Architecture](./aws.jfif)
+![ARAK AWS Solution Architecture](./aws.png)
 
-The diagram represents the solution architecture described throughout the repository.
+The main diagram represents the complete target solution architecture: public edge, VPC segmentation, two Availability Zones, ALB, EC2 Auto Scaling, RDS Multi-AZ, NAT gateways, security/management services, and monitoring.
 
-## Main Layers
+The editable vector version is available as [aws.svg](./aws.svg).
 
-1. Route 53
-2. CloudFront
-3. AWS WAF
-4. Application Load Balancer
-5. EC2 Auto Scaling Group
-6. Amazon RDS for SQL Server
-7. NAT Gateway and VPC networking
-8. IAM, Secrets Manager, Systems Manager
-9. CloudWatch and SNS
+## Verified Architecture Values
 
-## Network Layout
+- Region: `us-east-1`
+- VPC: `arak-vpc` — `10.0.0.0/16`
+- Public-A: `10.0.1.0/24`
+- Public-B: `10.0.2.0/24`
+- App-A: `10.0.11.0/24`
+- App-B: `10.0.12.0/24`
+- DB-A: `10.0.21.0/24`
+- DB-B: `10.0.22.0/24`
+- Application port: `5000`
+- SQL Server port: `1433`
+- Target-design ASG capacity: minimum 2, desired 2, maximum 6
+- Target-design NAT: one gateway per Availability Zone
+- RDS: SQL Server Standard Edition, private, Multi-AZ
 
-### AZ-1
-
-| Tier | CIDR |
-|---|---|
-| Public | `10.0.1.0/24` |
-| Private Application | `10.0.11.0/24` |
-| Private Database | `10.0.21.0/24` |
-
-### AZ-2
-
-| Tier | CIDR |
-|---|---|
-| Public | `10.0.2.0/24` |
-| Private Application | `10.0.12.0/24` |
-| Private Database | `10.0.22.0/24` |
-
-## Request Paths
-
-### Request path
+## Request Path
 
 ```text
 User
@@ -48,18 +34,11 @@ User
   -> CloudFront + WAF
   -> Application Load Balancer
   -> Target Group
-  -> EC2 Auto Scaling Group
+  -> Private EC2 Auto Scaling Group
   -> React/Vite + Nginx / ASP.NET Core API
   -> RDS SQL Server
 ```
 
-CloudFront provides the public edge and caching layer in front of the Application Load Balancer.
+## Practical Evidence
 
-## Design Notes
-
-- ALB spans both public subnets.
-- EC2 instances are private.
-- RDS is private and Multi-AZ.
-- Application traffic uses port `5000`.
-- SQL Server traffic uses port `1433`.
-- CloudWatch and SNS provide observability and alerting.
+The concrete deployed environment is documented separately under [DOCUMENTATION/practical-implementation.md](../../DOCUMENTATION/practical-implementation.md). That record preserves the actual deployed resource names and values used during validation.
