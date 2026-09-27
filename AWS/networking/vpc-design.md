@@ -105,7 +105,7 @@ Security Groups remain the primary resource-level traffic control.
 
 ## DNS and Edge
 
-Route 53 points the public application domain to CloudFront. CloudFront provides the public edge layer and can use separate origins for the static frontend and API. AWS documents CloudFront support for S3 and Application Load Balancer origins. citeturn1search11
+Route 53 points the public application domain to CloudFront. CloudFront provides the public edge layer and can use separate origins for the static frontend and API. AWS documents CloudFront support for S3 and Application Load Balancer origins.
 
 ## Design Result
 
