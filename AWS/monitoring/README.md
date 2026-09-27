@@ -47,7 +47,7 @@ Thresholds should be tuned to the application's normal workload.
 
 The primary Auto Scaling policy uses target tracking on average EC2 CPU utilization at 50%.
 
-Step scaling can be used for exceptional spikes with carefully separated thresholds. AWS recommends caution when combining target tracking and step scaling because conflicting policies can cause undesirable behavior. citeturn0search0turn0search11
+Step scaling can be used for exceptional spikes with carefully separated thresholds. AWS recommends caution when combining target tracking and step scaling because conflicting policies can cause undesirable behavior.
 
 ## SNS
 
