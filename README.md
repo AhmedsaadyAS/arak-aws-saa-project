@@ -182,7 +182,7 @@ The practical implementation is documented separately so the repository clearly 
 │   ├── target-architecture.md
 │   └── diagrams/
 │       ├── README.md
-│       ├── aws.png
+│       ├── aws.svg
 │       └── aws.svg
 ├── AWS/
 │   ├── edge/
