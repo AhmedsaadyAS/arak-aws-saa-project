@@ -8,11 +8,7 @@ The production build produces static assets that do not require a running applic
 
 ## Amazon S3
 
-The production frontend is designed to be stored in a private S3 bucket.
-
-The bucket is not intended to be directly exposed as a public website.
-
-CloudFront is used as the public delivery layer.
+The production React/Vite build is served by the existing Nginx web layer on the application instances. CloudFront sits in front of the ALB and caches static frontend assets at the edge.
 
 ## CloudFront Flow
 
@@ -26,10 +22,10 @@ Route 53
 CloudFront + WAF
  |
  v
-S3
+Application Load Balancer
  |
  v
-React/Vite Static Assets
+Nginx / React + ASP.NET Core API
 ```
 
 ## API Integration
@@ -53,5 +49,4 @@ ASP.NET Core API
 
 - Static assets are cached at edge locations.
 - Frontend compute is separated from backend compute.
-- S3 provides durable object storage for the frontend build.
 - The API remains behind the ALB and private EC2 instances.
