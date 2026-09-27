@@ -250,8 +250,7 @@ The final solution separates:
 
 1. DNS
 2. Edge delivery and protection
-3. Static frontend delivery
-4. Load balancing
+3. Load balancing
 5. Replaceable application compute
 6. Managed database
 7. Monitoring and operations
