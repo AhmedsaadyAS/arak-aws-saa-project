@@ -13,13 +13,12 @@ The diagram represents the solution architecture described throughout the reposi
 1. Route 53
 2. CloudFront
 3. AWS WAF
-4. S3 static frontend
-5. Application Load Balancer
-6. EC2 Auto Scaling Group
-7. Amazon RDS for SQL Server
-8. NAT Gateway and VPC networking
-9. IAM, Secrets Manager, Systems Manager
-10. CloudWatch and SNS
+4. Application Load Balancer
+5. EC2 Auto Scaling Group
+6. Amazon RDS for SQL Server
+7. NAT Gateway and VPC networking
+8. IAM, Secrets Manager, Systems Manager
+9. CloudWatch and SNS
 
 ## Network Layout
 
@@ -41,20 +40,20 @@ The diagram represents the solution architecture described throughout the reposi
 
 ## Request Paths
 
-### Static frontend
+### Request path
 
 ```text
-User -> Route 53 -> CloudFront/WAF -> S3
+User
+  -> Route 53
+  -> CloudFront + WAF
+  -> Application Load Balancer
+  -> Target Group
+  -> EC2 Auto Scaling Group
+  -> React/Vite + Nginx / ASP.NET Core API
+  -> RDS SQL Server
 ```
 
-### API
-
-```text
-User / Frontend -> Route 53 -> CloudFront/WAF -> ALB
-             -> Target Group -> EC2 ASG -> ASP.NET Core -> RDS
-```
-
-CloudFront supports both S3 and Application Load Balancer origins.
+CloudFront provides the public edge and caching layer in front of the Application Load Balancer.
 
 ## Design Notes
 
