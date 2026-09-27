@@ -54,7 +54,7 @@ User / Frontend -> Route 53 -> CloudFront/WAF -> ALB
              -> Target Group -> EC2 ASG -> ASP.NET Core -> RDS
 ```
 
-CloudFront supports both S3 and Application Load Balancer origins. citeturn1search11
+CloudFront supports both S3 and Application Load Balancer origins.
 
 ## Design Notes
 
