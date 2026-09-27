@@ -1,174 +1,120 @@
 # VPC and Networking Design
 
-## Status
+## Design Goal
 
-**Implemented and manually validated.**
+Create a two-AZ VPC that separates Internet-facing resources, application compute, and database resources.
 
-This document records the validated network foundation for the Arak AWS Solutions Architect – Associate project. It follows the selected Manara brief: a production-grade EC2 application in a VPC with public and private subnets across two Availability Zones, with ALB, Auto Scaling, NAT Gateway, Security Groups, NACLs, and a private managed database.
+## VPC
 
-## 1. Design Goals
-
-- Use two Availability Zones for high availability.
-- Keep the Application Load Balancer in public subnets.
-- Keep application EC2 instances in private subnets.
-- Keep the database in dedicated private database subnets.
-- Avoid direct Internet access to application EC2 instances.
-- Provide controlled outbound Internet access from private application subnets through NAT Gateway(s).
-- Keep database subnets without a direct Internet route.
-- Make the subnet and routing design explicit before creating AWS resources.
-
-## 2. Proposed VPC CIDR
-
-**VPC:** `10.0.0.0/16`
-
-This provides enough address space for the project while leaving room for future subnets without changing the VPC CIDR.
-
-## 3. Proposed Subnet Layout
+**CIDR:** `10.0.0.0/16`
 
 | Availability Zone | Subnet | CIDR | Type | Intended resources |
 |---|---|---|---|---|
-| AZ-1 | Public-A | `10.0.1.0/24` | Public | ALB nodes, NAT Gateway |
-| AZ-1 | App-A | `10.0.11.0/24` | Private | EC2 Auto Scaling Group |
-| AZ-1 | DB-A | `10.0.21.0/24` | Private | RDS subnet group |
-| AZ-2 | Public-B | `10.0.2.0/24` | Public | ALB nodes, NAT Gateway |
-| AZ-2 | App-B | `10.0.12.0/24` | Private | EC2 Auto Scaling Group |
-| AZ-2 | DB-B | `10.0.22.0/24` | Private | RDS subnet group |
+| AZ-1 | Public-A | `10.0.1.0/24` | Public | ALB, NAT Gateway |
+| AZ-1 | App-A | `10.0.11.0/24` | Private | EC2 Auto Scaling |
+| AZ-1 | DB-A | `10.0.21.0/24` | Private | RDS |
+| AZ-2 | Public-B | `10.0.2.0/24` | Public | ALB, NAT Gateway |
+| AZ-2 | App-B | `10.0.12.0/24` | Private | EC2 Auto Scaling |
+| AZ-2 | DB-B | `10.0.22.0/24` | Private | RDS |
 
-The exact AWS Availability Zone names will be selected in the deployment region when the resources are created; the design intentionally refers to AZ-1 and AZ-2 rather than hard-coding names at this stage.
+## Internet Gateway
 
-## 4. Internet Gateway
+One Internet Gateway is attached to the VPC.
 
-One Internet Gateway will be attached to the VPC.
-
-The public route table will contain:
+Public route tables use:
 
 ```text
 0.0.0.0/0 -> Internet Gateway
 ```
 
-This allows resources that are intentionally placed in public subnets to reach the Internet when their security controls also permit the traffic.
+## NAT Gateway
 
-## 5. Public Route Table
-
-The public route table will be associated with:
-
-- Public-A
-- Public-B
-
-Route:
+The high-availability design uses one NAT Gateway per Availability Zone.
 
 ```text
-VPC local route
-0.0.0.0/0 -> Internet Gateway
+App-A -> NAT-A -> Internet Gateway
+App-B -> NAT-B -> Internet Gateway
 ```
 
-The ALB requires public subnets so that it can receive Internet-facing traffic.
+This keeps private application instances without public IP addresses while providing controlled outbound access.
 
-## 6. Private Application Route Tables
+## Database Routing
 
-The application subnets will not have a direct route to the Internet Gateway.
+Database subnets retain the local VPC route only.
 
-For the production/high-availability target, each AZ will have a NAT Gateway in its corresponding public subnet:
+No direct Internet default route is provided to the database tier.
+
+## Traffic Model
+
+### Internet to application
 
 ```text
-App-A route table:
-0.0.0.0/0 -> NAT Gateway in Public-A
-
-App-B route table:
-0.0.0.0/0 -> NAT Gateway in Public-B
+Internet
+ -> Route 53
+ -> CloudFront
+ -> WAF
+ -> ALB
+ -> Target Group
+ -> Private EC2
 ```
-
-This keeps private EC2 instances private while allowing controlled outbound access for package updates, dependency retrieval, monitoring agents, or other required external connections.
-
-### Cost note
-
-Two NAT Gateways provide better AZ independence but cost more. A single NAT Gateway is acceptable as a temporary cost-saving lab configuration, but it would introduce a cross-AZ dependency and a single point of failure for private-subnet egress. The final production-oriented design therefore uses one NAT Gateway per AZ unless the project budget requires the lab alternative.
-
-## NAT Gateway Implementation
-
-The production-oriented design prefers one NAT Gateway per Availability Zone.
-
-For the current lab implementation, a single NAT Gateway named `arak-nat-a` was deployed in Public-A. Both private application subnets currently use the private application route table that routes outbound traffic through this NAT Gateway.
-
-This is a cost-optimized lab configuration and introduces a potential cross-AZ dependency for private-subnet egress.
-
-## 7. Database Route Tables
-
-The DB subnets will use dedicated database route tables.
-
-They will retain the VPC local route but will not have a default route to the Internet Gateway.
-
-The database therefore remains isolated from direct Internet access.
-
-## 8. Traffic Model
-
-### User to application
-
-1. Internet user reaches the public entry point.
-2. Internet-facing ALB receives the request in the public subnets.
-3. ALB forwards approved application traffic to healthy EC2 instances in the private App-A/App-B subnets.
 
 ### Application to database
 
-1. EC2 instances initiate database connections.
-2. The database Security Group allows SQL Server traffic only from the application Security Group.
-3. RDS remains in the private DB subnets.
+```text
+Private EC2
+ -> App Security Group
+ -> DB Security Group
+ -> RDS SQL Server :1433
+```
 
 ### Private outbound traffic
 
-1. EC2 initiates an outbound connection when required.
-2. Traffic goes through the AZ-local NAT Gateway.
-3. NAT Gateway is located in a public subnet and uses the Internet Gateway for Internet egress.
-4. Internet hosts cannot initiate a new inbound connection through the NAT Gateway to the private EC2 instance.
+```text
+Private EC2
+ -> NAT Gateway
+ -> Internet Gateway
+ -> Internet
+```
 
-## 9. Security Group Plan
+## Security Groups
 
-Security Groups will be stateful and resource-specific.
-
-### ALB Security Group
+### ALB SG
 
 Allow:
 
-- TCP 80 from Internet for the initial HTTP deployment/testing path.
-- TCP 443 from Internet when HTTPS is introduced.
+- TCP 80 from the public edge
+- TCP 443 from the public edge
 
-Do not allow database access from the ALB Security Group.
+### Application SG
 
-### Application Security Group
+Allow:
 
-Allow the application port only from the ALB Security Group.
+- TCP 5000 from ALB SG only
 
-Do not allow the application port directly from `0.0.0.0/0`.
+### Database SG
 
-### Database Security Group
+Allow:
 
-Allow TCP 1433 only from the Application Security Group because Arak currently uses SQL Server.
+- TCP 1433 from Application SG only
 
-No public inbound database rule will be created.
+## NACLs
 
-## 10. NACL Plan
+Network ACLs provide subnet-level defense in depth.
 
-Network ACLs will provide subnet-level defense in depth.
+Security Groups remain the primary resource-level traffic control.
 
-The first implementation should remain simple and avoid duplicating every Security Group rule. The design will document any custom NACL rules that are actually required.
+## DNS and Edge
 
-The primary workload-level access control remains Security Groups because they are attached to the relevant resources and are stateful.
+Route 53 points the public application domain to CloudFront. CloudFront provides the public edge layer and can use separate origins for the static frontend and API. AWS documents CloudFront support for S3 and Application Load Balancer origins. citeturn1search11
 
-## 11. DNS and Higher-Level Edge Services
+## Design Result
 
-Route 53, CloudFront, and WAF are part of the expected target architecture from the project brief, but they are intentionally handled after the core VPC, ALB, Auto Scaling, and database path is working.
+The network provides:
 
-This keeps the implementation incremental and makes it easier to validate each layer.
-
-## 12. Implementation Record
-
-1. AWS region: `us-east-1`, Availability Zones: `us-east-1a` and `us-east-1b`.
-2. VPC `10.0.0.0/16` and six subnets were created.
-3. Internet Gateway, public routing, NAT Gateway, private application routing, and private database routing were created.
-4. ALB, application, and database Security Groups were created and validated.
-5. EC2-to-RDS connectivity and the complete ALB-to-application flow were validated.
-6. The next implementation order is CloudFormation networking, security, database, compute, load balancing, and monitoring.
-
-## 13. Manual Validation Status
-
-The VPC, subnet layout, routing, NAT Gateway, database isolation, Security Groups, and application traffic path are considered complete for the manual architecture phase. Resource IDs and screenshots remain documentation work for the evidence package.
+- Two Availability Zones
+- Public/private segmentation
+- Private application compute
+- Private database tier
+- Controlled outbound Internet access
+- No direct Internet route to the database
+- Clear resource-to-resource security boundaries
