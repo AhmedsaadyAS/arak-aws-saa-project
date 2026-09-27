@@ -38,55 +38,49 @@ This document records the main architecture decisions for the Arak AWS Solutions
 
 **Reason:** CloudFront provides global delivery and caching, while WAF provides web-layer protection. CloudFront can use S3 and ALB origins, allowing static frontend content and dynamic API traffic to follow separate paths.
 
-## ADR-007 — Use S3 for the Static Frontend
-
-**Decision:** Host the production React/Vite build as static assets in Amazon S3 and deliver them through CloudFront.
-
-**Reason:** The frontend is static after the build and is therefore a suitable CDN-backed object-storage workload.
-
-## ADR-008 — Use NAT Gateway Per Availability Zone
+## ADR-007 — Use NAT Gateway Per Availability Zone
 
 **Decision:** Provide an AZ-local NAT Gateway for private application egress.
 
 **Reason:** This avoids making private-subnet Internet egress dependent on a single Availability Zone.
 
-## ADR-009 — Security Groups as the Primary Firewall
+## ADR-008 — Security Groups as the Primary Firewall
 
 **Decision:** Use Security Groups for resource-to-resource access and NACLs as subnet-level defense in depth.
 
 **Reason:** Security Groups provide clear stateful controls between ALB, application, and database layers.
 
-## ADR-010 — Target Tracking as the Primary Scaling Policy
+## ADR-009 — Target Tracking as the Primary Scaling Policy
 
 **Decision:** Use target tracking on average EC2 CPU utilization with a 50% target.
 
 **Reason:** Target tracking automatically adjusts capacity around the selected utilization target.
 
-## ADR-011 — Step Scaling for Exceptional Spikes
+## ADR-010 — Step Scaling for Exceptional Spikes
 
 **Decision:** Document step scaling as an advanced scale-out mechanism for unusually high utilization.
 
 **Reason:** Step scaling allows larger capacity adjustments at defined thresholds. It must be designed carefully alongside target tracking because conflicting policies can cause undesirable scaling behavior.
 
-## ADR-012 — Multi-AZ RDS for SQL Server
+## ADR-011 — Multi-AZ RDS for SQL Server
 
 **Decision:** Use Amazon RDS for SQL Server with a Multi-AZ deployment.
 
 **Reason:** RDS provides managed database operations and automatic failover for supported SQL Server Multi-AZ configurations. SQL Server Standard Edition is selected for the architecture.
 
-## ADR-013 — Secrets Manager for Database Credentials
+## ADR-012 — Secrets Manager for Database Credentials
 
 **Decision:** Store database credentials in AWS Secrets Manager.
 
 **Reason:** Application instances should retrieve secrets at runtime rather than embedding credentials in images, source code, or User Data.
 
-## ADR-014 — Systems Manager Session Manager
+## ADR-013 — Systems Manager Session Manager
 
 **Decision:** Use Systems Manager Session Manager for administrative access.
 
 **Reason:** Application instances remain private and do not require public SSH access or a bastion host.
 
-## ADR-015 — CloudWatch and SNS
+## ADR-014 — CloudWatch and SNS
 
 **Decision:** Use CloudWatch for metrics, alarms, dashboards, and SNS for notifications.
 
