@@ -46,7 +46,7 @@ Only healthy targets receive traffic.
 
 ## Security
 
-The ALB Security Group accepts web traffic from the public edge.
+The ALB Security Group is designed to accept HTTPS traffic from CloudFront origin-facing infrastructure. An additional secret CloudFront origin header can be used to reject requests that bypass CloudFront.
 
 The application Security Group accepts port `5000` only from the ALB Security Group.
 
