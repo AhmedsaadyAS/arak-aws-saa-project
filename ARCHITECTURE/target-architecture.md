@@ -42,7 +42,7 @@ The architecture follows the selected Manara project:
                              Multi-AZ private database
 ```
 
-CloudFront supports multiple origins, including S3 and Application Load Balancers, making it suitable for separating static frontend delivery from dynamic API traffic while keeping a common public entry point. citeturn1search11
+CloudFront supports multiple origins, including S3 and Application Load Balancers, making it suitable for separating static frontend delivery from dynamic API traffic while keeping a common public entry point.
 
 ## DNS and Edge Layer
 
@@ -50,7 +50,7 @@ CloudFront supports multiple origins, including S3 and Application Load Balancer
 
 Route 53 provides the public DNS entry for the application.
 
-An alias record points the application domain to the CloudFront distribution. AWS documents Route 53 alias records as the standard way to route a domain to a CloudFront distribution. citeturn1search0
+An alias record points the application domain to the CloudFront distribution. AWS documents Route 53 alias records as the standard way to route a domain to a CloudFront distribution.
 
 ### CloudFront
 
@@ -144,7 +144,7 @@ The ALB:
 
 Target tracking maintains average EC2 CPU utilization around **50%**.
 
-The Auto Scaling Group automatically adds capacity when demand increases and removes capacity when demand falls, within the configured minimum and maximum limits. citeturn0search1
+The Auto Scaling Group automatically adds capacity when demand increases and removes capacity when demand falls, within the configured minimum and maximum limits.
 
 ### Advanced Policy — Step Scaling
 
@@ -157,7 +157,7 @@ Example design:
 | CPU > 70% | +1 instance |
 | CPU > 85% | +2 instances |
 
-Scale-in should remain controlled by the primary target-tracking policy or by a separately designed scale-in mechanism to avoid conflicting instructions. AWS recommends caution when combining target tracking and step scaling. citeturn0search0turn0search11
+Scale-in should remain controlled by the primary target-tracking policy or by a separately designed scale-in mechanism to avoid conflicting instructions. AWS recommends caution when combining target tracking and step scaling.
 
 ## Database Tier
 
@@ -174,7 +174,7 @@ Design:
 - Automated backups
 - Multi-AZ deployment
 
-RDS Multi-AZ uses a synchronized standby in another Availability Zone and can automatically fail over while preserving the database endpoint. citeturn0search4turn0search15
+RDS Multi-AZ uses a synchronized standby in another Availability Zone and can automatically fail over while preserving the database endpoint.
 
 ## Security Model
 
