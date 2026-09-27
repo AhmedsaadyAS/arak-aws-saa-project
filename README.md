@@ -6,30 +6,26 @@ AWS Solutions Architect – Associate graduation project based on the Arak educa
 
 **Manara Project 1 – Scalable Web Application with ALB and Auto Scaling**
 
-The goal of this repository is to document a complete AWS solution architecture for Arak. The project focuses on architecture design, service selection, network segmentation, security, availability, scalability, observability, and operational considerations.
-
-A live deployment is not required for the project deliverable. The repository therefore presents the **designed solution architecture** rather than a deployment-status report.
+This repository documents the complete AWS solution architecture for Arak and the practical AWS implementation evidence produced during the project. It covers architecture design, network segmentation, security, availability, scalability, observability, and operational access.
 
 ## Solution Architecture
 
-![ARAK AWS Solution Architecture](ARCHITECTURE/diagrams/aws.jfif)
+![ARAK AWS Solution Architecture](ARCHITECTURE/diagrams/aws.png)
 
 The architecture uses:
 
 - Amazon Route 53 for DNS
 - Amazon CloudFront for global delivery and static-content caching
 - AWS WAF for web-layer protection
-- - Internet-facing Application Load Balancer for API traffic
+- Internet-facing Application Load Balancer for application traffic
 - Amazon EC2 Auto Scaling across two Availability Zones
-- Dockerized ASP.NET Core API
+- Dockerized React/Vite + Nginx frontend and ASP.NET Core API
 - Amazon RDS for SQL Server in private database subnets
 - NAT Gateway for controlled private-subnet egress
 - IAM roles, AWS Secrets Manager, and Systems Manager
 - Amazon CloudWatch and Amazon SNS for monitoring and alerting
 
 ## Request Flow
-
-### Request Flow
 
 ```text
 User
@@ -51,18 +47,18 @@ EC2 Auto Scaling Group
   |
   +--> React/Vite + Nginx
   |
-  +--> ASP.NET Core API
+  +--> ASP.NET Core API :5000
              |
              v
-       Amazon RDS for SQL Server
+       Amazon RDS for SQL Server :1433
 ```
 
-CloudFront can use multiple origins, including Amazon S3 and an Application Load Balancer, which allows the frontend and API paths to share the same public entry point.
+CloudFront provides the public edge and caching layer in front of the Application Load Balancer. The ALB is the origin for the frontend and API application traffic.
 
 ## Network Design
 
 **Region:** `us-east-1`  
-**VPC CIDR:** `10.0.0.0/16`
+**VPC:** `arak-vpc` — `10.0.0.0/16`
 
 | Tier | AZ-1 | AZ-2 | Purpose |
 |---|---|---|---|
@@ -70,13 +66,9 @@ CloudFront can use multiple origins, including Amazon S3 and an Application Load
 | Private Application | `10.0.11.0/24` | `10.0.12.0/24` | EC2 Auto Scaling |
 | Private Database | `10.0.21.0/24` | `10.0.22.0/24` | RDS subnet group |
 
-The ALB is placed in public subnets. Application instances and the database remain private. Application subnets use NAT Gateway for controlled outbound access, while database subnets do not have a direct Internet route.
-
-For the high-availability design, one NAT Gateway is placed in each Availability Zone.
+The ALB is placed in public subnets. Application instances and the database remain private. The high-availability design uses one NAT Gateway per Availability Zone for application-subnet egress. Database subnets do not have a direct Internet route.
 
 ## Security Architecture
-
-Traffic is restricted layer by layer:
 
 ```text
 Internet
@@ -85,19 +77,19 @@ Internet
 CloudFront / WAF
    |
    v
-ALB Security Group
+ALB
    |
    v
-Application Security Group
+Private EC2
    |
    v
-Database Security Group
+Private RDS SQL Server
 ```
 
 Key controls:
 
 - WAF protects the public web layer.
-- ALB accepts web traffic and forwards only approved application traffic.
+- ALB forwards approved application traffic to healthy targets.
 - EC2 instances have no public IP addresses.
 - Application port `5000` is reachable only from the ALB security group.
 - SQL Server port `1433` is reachable only from the application security group.
@@ -124,13 +116,18 @@ Key controls:
 
 The primary scaling policy is **target tracking** using average EC2 CPU utilization with a target of 50%.
 
-A step-scaling policy is also documented as an advanced response mechanism for exceptional load conditions. It should be configured so that it does not conflict with the primary target-tracking policy. AWS notes that target tracking is sufficient for many workloads and recommends caution when combining it with step scaling because conflicting policies can cause undesirable behavior.
+A step-scaling policy is also documented as an advanced response mechanism for exceptional load conditions:
+
+| CPU condition | Adjustment |
+|---|---:|
+| > 70% | +1 instance |
+| > 85% | +2 instances |
+
+The policies are designed with separated responsibilities to avoid conflicting scaling behavior.
 
 ### Database Tier
 
-Amazon RDS for SQL Server is placed in private database subnets spanning two Availability Zones. The solution uses a SQL Server edition that supports the selected Multi-AZ configuration.
-
-RDS Multi-AZ provides a standby database in another Availability Zone and supports automatic failover while retaining the same database endpoint.
+Amazon RDS for SQL Server is placed in private database subnets spanning two Availability Zones. The solution architecture uses SQL Server Standard Edition with Multi-AZ deployment.
 
 ## Observability
 
@@ -145,7 +142,7 @@ CloudWatch monitors the main application and infrastructure signals:
 - RDS database connections
 - RDS free storage
 
-SNS is used for important alarm notifications.
+SNS receives important alarm notifications.
 
 ## AWS Services
 
@@ -154,7 +151,6 @@ SNS is used for important alarm notifications.
 | Route 53 | DNS and domain routing |
 | CloudFront | CDN and static-content delivery |
 | AWS WAF | Web application protection |
-| S3 | React/Vite static frontend |
 | VPC | Network isolation |
 | Internet Gateway | Public subnet connectivity |
 | NAT Gateway | Private application egress |
@@ -168,6 +164,14 @@ SNS is used for important alarm notifications.
 | CloudWatch | Metrics, alarms, and dashboards |
 | SNS | Alarm notifications |
 
+## Practical Implementation & Evidence
+
+The repository also preserves the AWS components that were actually deployed and validated during the practical work.
+
+See [DOCUMENTATION/practical-implementation.md](DOCUMENTATION/practical-implementation.md) for the concrete environment and [EVIDENCE/screenshots](EVIDENCE/screenshots/README.md) for supporting screenshots.
+
+The practical implementation is documented separately so the repository clearly distinguishes the complete solution architecture from the concrete AWS work performed.
+
 ## Repository Structure
 
 ```text
@@ -178,7 +182,8 @@ SNS is used for important alarm notifications.
 │   ├── target-architecture.md
 │   └── diagrams/
 │       ├── README.md
-│       └── aws.jfif
+│       ├── aws.png
+│       └── aws.svg
 ├── AWS/
 │   ├── edge/
 │   │   └── README.md
@@ -201,7 +206,12 @@ SNS is used for important alarm notifications.
 │   └── cost/
 │       └── README.md
 ├── DOCUMENTATION/
-│   └── architecture-decisions.md
+│   ├── architecture-decisions.md
+│   └── practical-implementation.md
+├── EVIDENCE/
+│   └── screenshots/
+├── cloudformation/
+│   └── network.yaml
 └── CHANGELOG.md
 ```
 
@@ -211,6 +221,4 @@ The architecture decisions are documented in [DOCUMENTATION/architecture-decisio
 
 ## Project Scope
 
-This repository is intentionally **architecture-first**. The important deliverable is the AWS solution design and its documentation, not a live AWS environment.
-
-The architecture can be implemented later using the documented network layout, security rules, service configuration, scaling policies, monitoring strategy, and operational model.
+The repository presents the complete solution architecture required for the Manara project and a separate record of the practical AWS implementation and evidence. The architecture documentation covers the network topology, security boundaries, application tier, database tier, edge services, scaling model, monitoring, and operational access.
