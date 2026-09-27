@@ -29,8 +29,7 @@
   <rect x="1310" y="473" width="165" height="58" rx="10" class="service"/><text x="1392" y="499" text-anchor="middle" class="label">NAT-B</text><text x="1392" y="520" text-anchor="middle" class="tiny">private egress</text>
   <rect x="840" y="575" width="660" height="120" rx="14" class="private"/><text x="865" y="605" class="label">App-B • 10.0.12.0/24</text><text x="865" y="631" class="small">Private EC2 • Auto Scaling • Docker</text><text x="865" y="656" class="small">React/Vite + Nginx • ASP.NET Core API :5000</text><text x="865" y="681" class="tiny">ASG: arak-app-asg • Min 2 • Desired 2 • Max 6</text>
   <rect x="840" y="720" width="660" height="160" rx="14" class="db"/><text x="865" y="750" class="label">DB-B • 10.0.22.0/24</text><text x="865" y="778" class="small">Private RDS subnet</text><text x="865" y="806" class="label">RDS standby / Multi-AZ placement</text><text x="865" y="832" class="small">SQL Server • TCP 1433 • Private</text><text x="865" y="857" class="tiny">Same logical RDS deployment</text>
-  <path d="M1300 250 V390 H1120 V575" class="primary"/><text x="1150" y="385" class="small">Forwarded application traffic</text>
-  <path d="M760 635 H840" class="secondary"/><text x="755" y="615" text-anchor="end" class="tiny">ASG distributes across AZs</text>
+  <path d="M1300 250 V390 H800 V520" class="primary"/><path d="M800 520 L430 575" class="primary"/><path d="M800 520 L1170 575" class="primary"/><text x="800" y="505" text-anchor="middle" class="tiny">ALB distributes traffic to healthy targets</text>
   <path d="M430 695 V720" class="secondary"/><path d="M1170 695 V720" class="secondary"/><text x="800" y="708" text-anchor="middle" class="tiny">TCP 1433 • App SG → DB SG</text>
   <path d="M430 575 V550" class="dashed"/><path d="M1170 575 V550" class="dashed"/>
   <rect x="45" y="990" width="1510" height="175" rx="18" class="edge"/><text x="70" y="1022" class="section">Security, Management &amp; Monitoring</text>
