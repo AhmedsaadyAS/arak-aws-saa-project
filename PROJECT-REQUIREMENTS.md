@@ -15,7 +15,7 @@ This project follows the **AWS Solutions Architect - Associate Graduation Projec
    - The solution architecture diagram and documentation should be included in the README.
 
 3. **Optional Deliverable**
-   - A live URL or recorded video demonstrating the deployed solution on AWS.
+   - A live URL or recorded video demonstrating the solution on AWS.
 
 ## Selected Project Idea
 
@@ -23,62 +23,38 @@ This project follows the **AWS Solutions Architect - Associate Graduation Projec
 
 **Architecture:** EC2-Based
 
-The brief describes a production-grade web application on AWS using EC2 instances inside a properly architected VPC with public and private subnets across two Availability Zones.
+The solution is designed as a production-oriented web application on AWS using EC2 instances inside a properly architected VPC with public and private subnets across two Availability Zones.
 
-The architecture is expected to provide high availability and scalability using ALB, ASG, and CloudFront for static assets. A Multi-AZ RDS instance serves as the database backend, with compute in private subnets.
+The architecture provides high availability and scalability using an Application Load Balancer, Auto Scaling, and CloudFront. A Multi-AZ RDS deployment provides the managed database layer, with application compute in private subnets.
 
-## Key AWS Services Listed in the Brief
+## Key AWS Services
 
-- VPC: Public and private subnets, NAT Gateway, Security Groups, NACLs
+- VPC: public/private subnets, NAT Gateway, Security Groups, NACLs
 - EC2 + ASG: Launch Template and scaling policies
-- ALB + WAF: Layer 7 routing and WAF rules
-- CloudFront: Static asset caching
-- RDS Multi-AZ: MySQL/PostgreSQL examples in the brief
-- Route 53: Alias record pointing to ALB and health checks
+- ALB + WAF: Layer 7 routing and web protection
+- CloudFront: static asset delivery and caching
+- RDS Multi-AZ: managed relational database
+- Route 53: DNS and alias routing
 - Systems Manager: Session Manager
-- CloudWatch + SNS: Dashboards, alarms, and notifications
+- CloudWatch + SNS: dashboards, alarms, and notifications
 
-## Learning Outcomes Listed in the Brief
+## Learning Outcomes
 
 - Design VPCs with correct subnet, route table, and NAT Gateway configurations
 - Build highly available architectures across multiple Availability Zones
 - Configure ALB listener rules and target-group health checks
-- Implement Auto Scaling with target tracking and step scaling policies
-- Secure applications with WAF, Security Groups, and private subnets
+- Design Auto Scaling with target tracking and step scaling policies
+- Secure applications with WAF, Security Groups, NACLs, and private subnets
 - Use Systems Manager Session Manager as a bastion-free access alternative
 
 ## Arak Mapping
 
-Arak is being mapped to this project idea instead of creating a new application. The existing application already provides a frontend, backend, authentication, and SQL Server database. The AWS work focuses on redesigning the deployment into the required scalable architecture.
+Arak is mapped to the selected project instead of creating a new application. The existing application provides a React/Vite frontend, ASP.NET Core backend, authentication, and SQL Server database.
 
-## Status Rule
+The AWS work focuses on redesigning the application deployment into a scalable, highly available architecture.
 
-The repository must clearly distinguish:
+## Architecture Scope
 
-- **Current Prototype:** what is actually deployed now.
-- **Target Architecture:** what the final SAA project is designed to achieve.
-- **Completed Evidence:** resources and tests that have been verified as implemented.
+The repository documents the intended AWS solution architecture, including the network topology, security boundaries, application tier, database tier, edge services, scaling model, monitoring, and operational access.
 
-Never mark an AWS component as completed without implementation evidence.
-
-## Implementation Status
-
-The core architecture has been manually implemented and validated.
-
-Implemented components include:
-
-- VPC
-- Public and private subnets
-- Internet Gateway
-- NAT Gateway
-- Security Groups
-- EC2 Auto Scaling Group
-- Launch Template
-- Dockerized ASP.NET Core backend
-- Amazon RDS for SQL Server
-- AWS Secrets Manager
-- Application Load Balancer
-- Target Group
-- End-to-end health validation
-
-CloudFormation implementation has also started with the networking layer. The `arak-network-test` stack reached `CREATE_COMPLETE` in the `us-east-1` test environment.
+A live deployment is optional for the project deliverable, so deployment execution is outside the repository's required scope.
