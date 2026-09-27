@@ -14,14 +14,13 @@ The distribution uses two logical origins:
 
 | Origin | Purpose |
 |---|---|
-| Amazon S3 | React/Vite static frontend |
-| Application Load Balancer | ASP.NET Core API |
+| Application Load Balancer | React/Vite frontend and ASP.NET Core API |
 
 Example behavior routing:
 
 | Path | Origin |
 |---|---|
-| `/*` | S3 |
+| `/*` | ALB |
 | `/api/*` | ALB |
 
 CloudFront supports both S3 and Application Load Balancer origins.
