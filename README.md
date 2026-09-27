@@ -12,6 +12,8 @@ This repository documents the complete AWS solution architecture for Arak and th
 
 ![ARAK AWS Solution Architecture](ARCHITECTURE/diagrams/aws.svg)
 
+**Original architecture diagram:** [view the previous diagram version](https://github.com/AhmedsaadyAS/arak-aws-saa-project/blob/8ae1ad017ba71700535d7df86e661373336e2aa8/ARCHITECTURE/diagrams/aws.jfif)
+
 The architecture uses:
 
 - Amazon Route 53 for DNS
