@@ -10,7 +10,7 @@ This repository documents the complete AWS solution architecture for Arak and th
 
 ## Solution Architecture
 
-![ARAK AWS Solution Architecture](ARCHITECTURE/diagrams/aws.png)
+![ARAK AWS Solution Architecture](ARCHITECTURE/diagrams/aws.svg)
 
 The architecture uses:
 
